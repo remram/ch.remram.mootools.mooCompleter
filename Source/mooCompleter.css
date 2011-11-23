@@ -1,8 +1,72 @@
+html {
+	font-family: sans-serif;
+	font-size: .8em;
+	color: #555;
+	text-shadow: 1px 1px 0px #fff;
+}
+
+.shadow {
+  -moz-box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+  -webkit-box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+}
+
+.shadow-border {
+  -moz-box-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
+  -webkit-box-shadow: 0 0 2px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.7);
+}
+
+.rounded-corner-top {	
+	border-top-left-radius: 10px;
+	border-top-right-radius: 10px;
+	-moz-border-radius-topleft: 10px;
+	-moz-border-radius-topright: 10px;
+}
+
+.rounded-corner-top-3 {	
+	border-top-left-radius: 5px;
+	border-top-right-radius: 5px;
+	-moz-border-radius-topleft: 5px;
+	-moz-border-radius-topright: 5px;
+}
+
+.rounded-corner {	
+	border-radius: 10px;
+	-moz-border-radius: 10px;
+}
+
+.rounded-corner-5 {	
+	border-radius: 5px;
+	-moz-border-radius: 5px;
+}
+
+/* DIVs Clear fixing */
+/* for Firefox, IE8, Opera, Safari, etc. */
+.clearfix:after {
+    content: ".";
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden;
+}
+
+/* for IE7 */
+* + html .clearfix {
+    display: inline-block;
+}
+
+/* for IE6 */
+* html .clearfix {
+	height: 1%;
+}
+
 div.mc-content {
-	width: 400px;
+	width: 200px;
 	height: 20px;
 	border: 1px solid #aaa;
 	background: transparent;
+	padding: .5em;
 }
 
 div.mc-content ul {
@@ -27,4 +91,99 @@ div.mc-content ul li input.visible {
 
 div.mc-content ul li input.hide {
 	display: none;
+}
+
+/**
+ * Button 
+ */
+div.mc-content-btn-add {
+	float: left;
+	width: 70px;
+	font-weight: bold;
+	border: 1px solid #aaa;
+	margin-bottom: .5em;
+	padding: .2em;
+	text-align: center;
+	cursor: pointer;
+	background-color: #d8d8d8;
+}
+
+div.mc-content-btn-add:hover {
+	color: #0B55C4;
+	background-color: #bdbdbd;
+}
+
+div.mc-content-btn-cancel {
+	float: left;
+	width: 70px;
+	font-weight: bold;
+	border: 1px solid #aaa;
+	margin: 0 0 .5em 1em;
+	padding: .2em;
+	text-align: center;
+	cursor: pointer;
+	background-color: #d8d8d8;
+}
+
+div.mc-content-btn-cancel:hover {
+	color: #0B55C4;
+	background-color: #bdbdbd;
+}
+
+/**
+ * Lable input area
+ */
+div.mc-content-lable-div {
+	clear: both;
+	width: 100%;
+	border: 1px solid #aaa;
+	background-color: #ccc;
+	margin: .5em 0 .5em 0;
+}
+
+div.mc-content-lable-div input {
+	border: 1px solid #888;
+	width: 94%;
+	margin: .2em;
+	padding: .2em;
+	font-size: .9em;
+}
+
+.overTxtLabel { color:#999; }
+
+/**
+ * Select option area
+ */
+div.mc-content-options-div {
+	width: 100%;
+	height: 150px;
+	border: 1px solid #aaa;
+	overflow: auto;
+	margin: 2em 0 1em 0;
+	background-color: #d8d8d8;
+}
+
+div.mc-content-options-div,
+div.mc-content-options-div ul,
+div.mc-content-options-div ul li {
+	clear: both;
+	cursor: pointer;
+	width: 99%;
+	padding: .2em 0 .2em 0;
+}
+
+div.mc-content-options-div ul li span {
+	padding: 0 .2em 0 .2em;
+}
+
+div.mc-content-options-div ul li:hover {
+	background-color: #bdbdbd;
+}
+
+div.mc-content-options-div ul li.selected {
+	background-color: #81BEF7;
+}
+
+div.mc-content-options-div ul li.selected:hover {
+	background-color: #6599c9;
 }

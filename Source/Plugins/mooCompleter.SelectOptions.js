@@ -13,33 +13,60 @@ var mooCompleterSelectOptions = new Class({
 	initialize: function(el,options){
 		this.element = document.id(el); if (!this.element) return;
 		this.setOptions(options);
-		this.prefix = this.options.prefix;
-		this.ul = {};
+		this.prefix  = this.options.prefix;
+		this.ul      = {};
 		
 		this.constructSelectOptionArea();
 	},
 	
-	initDivArea: function() {
-		if(document.id(this.prefix + '-options-div')) {
-			return document.id(this.prefix + '-options-div');
-		} 
-		return this.element;
+	constructSelectOptionArea: function() {
+		this.optionDiv = document.id(this.prefix + '-options-div');
+		
+		if(this.isElementEmpty(this.optionDiv)) {
+			this.optionDiv.empty().addClass('rounded-corner-5').adopt(
+					this.ul = new Element('ul[id="' + this.prefix + '-options-ul" class="' + this.prefix + '-options-ul"]')
+			);
+			
+			Array.each(this.options.data, function(value, index){
+				this.ul.adopt(
+						new Element('li' + 
+								'[id="' + this.prefix + '-options-li-' + value[0] + '"]' + 
+								'[key="' + value[0] + '"]' +
+								'[class="' + this.prefix + '-options-li rounded-corner-top-3 shadow-border"]').adopt(
+										new Element('span[text="' + value[1] + '"]')
+						)
+				);
+			}.bind(this));
+			
+			this.initPreSelectedItems();
+		}	
+		
+		this.addOptionEvent();
 	},
 	
-	constructSelectOptionArea: function() {
-		this.optionDiv = this.initDivArea();
-		
-		if(document.id(this.prefix + '-options-ul')) {
-			this.ul = document.id(this.prefix + '-options-ul');
+	addOptionEvent: function() {
+		$$('li.' + this.prefix + '-options-li').each(function(el){
+			el.removeEvents('click').addEvent('click', function(e) {
+				e.stop();
+				this.setItemBackground(el);
+				this.registerItem(el);
+			}.bind(this));
+		}.bind(this));
+	},
+	
+	setItemBackground: function(el) {
+		if(el.hasClass('selected')) {
+			el.removeClass('selected');
 		} else {
-			this.optionDiv.adopt(
-					new Element('ul[id="' + this.prefix + '-options-ul" class="' + this.prefix + '-options-ul"]')
-			);
-			this.ul = document.id(this.prefix + '-options-ul');
+			el.addClass('selected');
 		}
-		
-		
-		console.info(this.optionDiv,this.ul);
-		console.info('Options: ',this.options.data);
+	},
+	
+	initPreSelectedItems: function() {
+		$$('li.' + this.prefix + '-options-li').each(function(el){
+			if(this.IsItemRegistered(el)) {
+				this.setItemBackground(el);
+			}
+		}.bind(this));
 	}
 });
