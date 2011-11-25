@@ -14,7 +14,7 @@ var mooCompleterAutoList = new Class({
 		this.prefix        = this.options.prefix;
 		this.filterValue   = '';
 		this.filteredArray = [];
-		this.divCompleter  = {};
+		this.divAutoList  = {};
 		this.ulCompleter   = {};
 	},
 	
@@ -44,21 +44,30 @@ var mooCompleterAutoList = new Class({
 	
 	addCompleterEvent: function() {
 		$$('input.autocompleter').each(function(el){
-			el.removeEvents('keyup').addEvent('keyup', function(e) {
-				e.stop();
-				this.filterValue = el.getProperty('value');
-				this.createFilteredArray();
-				//this.btnAdd();
-				console.info(this.filteredArray);
-				/*this.setItemBackground(el);
-				this.registerItem(el);
-				*/
-			}.bind(this));
+			this.createAutoListArea(el);
+			el.removeEvents(['keyup','click','blur']).addEvents({
+				'keyup': function(e) {
+					e.stop();
+					this.filterValue = el.getProperty('value');					
+					this.createFilteredArray();
+				}.bind(this),
+				
+				'click': function(e) {
+					e.stop();
+					this.filterValue = el.getProperty('value');					
+					this.createFilteredArray();
+				}.bind(this),
+				
+				'blur': function(e) {
+					e.stop();
+					this.divAutoList.fade('out');
+				}.bind(this)
+			});
 		}.bind(this));
 	},
 	
-	createFilteredArray: function(searchKey) {
-		this.filteredArray = this.options.data.filter(this.filterArray, this);
+	createFilteredArray: function() {
+		this.filteredArray = this.highlightFilteredArray( this.options.data.filter(this.filterArray, this) );
 		
 		if(this.filteredArray.length >= 1) {
 			this.buildFilteredList();
@@ -71,20 +80,47 @@ var mooCompleterAutoList = new Class({
 		return (element[1].test(this.filterValue, 'i'));
 	},
 	
+	highlightFilteredArray: function(filteredArray) {
+		var highlightedArray = [];
+		Array.each(filteredArray, function(value, index) {
+			highlightedArray.include([
+			                          value[0], this.highlightString(value[1])
+			                          ]);
+		}.bind(this));
+		return highlightedArray;
+	},
+	
+	highlightString: function(str) {
+		var reg = new RegExp('(' + this.filterValue + ')', 'g');
+		return str.replace(reg,'<b>' + this.filterValue + '</b>');
+	},
+	
+	createAutoListArea: function(inputElement) {
+		this.divAutoList = new Element('div' +
+				'[id="' + this.prefix + '-auto-completer-list-area"]' + 
+				'[class="' + this.prefix + '-auto-completer-list-area rounded-corner-bottom"]'
+		).setStyles({
+			top        : inputElement.getCoordinates().bottom,
+			left       : inputElement.getCoordinates().left + 2,			
+			width      : inputElement.getCoordinates().width - 10,
+			visibility : 'hidden'
+		}).inject(inputElement, 'after');
+	},
+	
 	buildFilteredList: function() {
 		this.cleanCompleterList();
-		
-		this.completerDiv.adopt(
+
+		this.divAutoList.adopt(
 				this.ulCompleter = new Element('ul[id="' + this.prefix + '-auto-completer-ul" class="' + this.prefix + '-auto-completer-ul"]')
-		);
+		).setStyle('visibility', 'visible').fade(.9);
 
 		Array.each(this.filteredArray, function(value, index){
 			this.ulCompleter.adopt(
 					new Element('li' + 
 							'[id="' + this.prefix + '-auto-completer-li-' + value[0] + '"]' + 
 							'[key="' + value[0] + '"]' +
-							'[class="' + this.prefix + '-auto-completer-li rounded-corner-top-3 shadow-border"]').adopt(
-									new Element('span[text="' + value[1] + '"]')
+							'[class="' + this.prefix + '-auto-completer-li"]').adopt(
+									new Element('span[html="' + value[1] + '"]')
 					)
 			);
 		}.bind(this));

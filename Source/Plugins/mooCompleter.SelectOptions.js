@@ -32,7 +32,7 @@ var mooCompleterSelectOptions = new Class({
 						new Element('li' + 
 								'[id="' + this.prefix + '-options-li-' + value[0] + '"]' + 
 								'[key="' + value[0] + '"]' +
-								'[class="' + this.prefix + '-options-li rounded-corner-top-3 shadow-border"]').adopt(
+								'[class="' + this.prefix + '-options-li rounded-corner-top-5 shadow-border"]').adopt(
 										new Element('span[text="' + value[1] + '"]')
 						)
 				);

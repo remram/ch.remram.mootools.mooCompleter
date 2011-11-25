@@ -39,7 +39,7 @@ var mooCompleter = new Class({
 	
 	constructInputArea: function() {
 		//set some styles
-		this.element.setStyle('cursor','pointer').addClass('rounded-corner');
+		this.element.setStyle('cursor','pointer').addClass('rounded-corner-bottom');
 		//clone the element
 		this.overlayElement = this.cloneElement(this.element, 'after', '_overlay').set('text',this.overlayLabel).addClass('shadow');
 		//switch overlay
@@ -49,11 +49,11 @@ var mooCompleter = new Class({
 				new Element('div[id="' + this.prefix + '-area"][style="visibility: hidden;"]').adopt(
 						new Element('div' + 
 								'[id="' + this.prefix + '-btn-add"]' +
-								'[class="' + this.prefix + '-btn-add rounded-corner-5"]' +
+								'[class="' + this.prefix + '-btn-add rounded-corner-bottom"]' +
 								'[text="' + this.btnAdd('get') + '"]'
 						),
 						new Element('div' + 
-								'[class="' + this.prefix + '-btn-cancel rounded-corner-5 clearfix"]' + 
+								'[class="' + this.prefix + '-btn-cancel rounded-corner-bottom clearfix"]' + 
 								'[text="Cancel"]'
 						).removeEvents('click').addEvent('click', function(e){
 							e.stop();
