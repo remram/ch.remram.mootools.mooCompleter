@@ -15,11 +15,11 @@ var mooCompleterSelectOptions = new Class({
 		this.setOptions(options);
 		this.prefix  = this.options.prefix;
 		this.ul      = {};
-		
-		this.constructSelectOptionArea();
 	},
 	
 	constructSelectOptionArea: function() {
+		if(!document.id(this.prefix + '-options-div')) return null;
+		
 		this.optionDiv = document.id(this.prefix + '-options-div');
 		
 		if(this.isElementEmpty(this.optionDiv)) {
@@ -48,24 +48,17 @@ var mooCompleterSelectOptions = new Class({
 		$$('li.' + this.prefix + '-options-li').each(function(el){
 			el.removeEvents('click').addEvent('click', function(e) {
 				e.stop();
-				this.setItemBackground(el);
+				this.setSelectedItemBgColor(el);
 				this.registerItem(el);
+				this.btnAdd();
 			}.bind(this));
 		}.bind(this));
-	},
-	
-	setItemBackground: function(el) {
-		if(el.hasClass('selected')) {
-			el.removeClass('selected');
-		} else {
-			el.addClass('selected');
-		}
 	},
 	
 	initPreSelectedItems: function() {
 		$$('li.' + this.prefix + '-options-li').each(function(el){
 			if(this.IsItemRegistered(el)) {
-				this.setItemBackground(el);
+				this.setSelectedItemBgColor(el);
 			}
 		}.bind(this));
 	}

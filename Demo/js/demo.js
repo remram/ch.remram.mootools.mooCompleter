@@ -1,8 +1,7 @@
-
-
 window.addEvent('domready', function() {
 	var mc = new mooCompleter('moo-completer', {
 		fxHeight: 500,
+		fxWidth: 600,
 		data: [
 		       ['key0', 'value0'],
 		       ['key1', 'value1'],
