@@ -27,13 +27,14 @@ var mooCompleterSelectOptions = new Class({
 					this.ul = new Element('ul[id="' + this.prefix + '-options-ul" class="' + this.prefix + '-options-ul"]')
 			);
 			
-			Array.each(this.options.data, function(value, index){
+			Array.each(this.options.data, function(obj, index){
 				this.ul.adopt(
 						new Element('li' + 
-								'[id="' + this.prefix + '-options-li-' + value[0] + '"]' + 
-								'[key="' + value[0] + '"]' +
+								'[id="' + this.prefix + '-options-li-' + obj.key + '"]' + 
+								'[refkey="' + obj.key + '"]' +
+								'[refvalue="' + obj.value + '"]' +
 								'[class="' + this.prefix + '-options-li rounded-corner-top-5 shadow-border"]').adopt(
-										new Element('span[text="' + value[1] + '"]')
+										new Element('span[text="' + obj.value + '"]')
 						)
 				);
 			}.bind(this));
@@ -57,7 +58,7 @@ var mooCompleterSelectOptions = new Class({
 	
 	initPreSelectedItems: function() {
 		$$('li.' + this.prefix + '-options-li').each(function(el){
-			if(this.IsItemRegistered(el)) {
+			if(this.IsItemRegistered(el.getProperty('refkey'))) {
 				this.setSelectedItemBgColor(el);
 			}
 		}.bind(this));

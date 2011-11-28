@@ -37,7 +37,21 @@ var mooCompleter = new Class({
 		this.element.set('text', this.options.data);
 	},
 	
+	checkDataArray: function() {
+		var boolean = true;
+		Array.each(this.options.data, function(value, index){
+			if(Object.getLength(value) != 2) {
+				boolean = false;
+			}
+		});
+		return boolean;
+	},
+	
 	constructInputArea: function() {
+		if(!this.checkDataArray()) {
+			this.element.set('text', 'Error: You put incorrect format for the data array!');
+			return null;
+		}
 		//set some styles
 		this.element.setStyle('cursor','pointer').addClass('rounded-corner-bottom');
 		//clone the element
@@ -70,12 +84,23 @@ var mooCompleter = new Class({
 						new Element('div' +
 								'[id="' + this.prefix + '-completer-div"]' +
 								'[class="' + this.prefix + '-completer-div clearfix"]'
+						).adopt(
+								new Element('div'+
+										'[id="' + this.prefix + '-completer-input-div"]' +
+										'[class="' + this.prefix + '-completer-input-div"]'
+								),
+								new Element('div'+
+										'[id="' + this.prefix + '-completer-element-container-div"]' +
+										'[class="' + this.prefix + '-completer-element-container-div"]'
+								)
 						)
 				)
 		);
 		
 		//create select option area if [selectOptions = true]
 		this.constructSelectOption();
+		
+		this.drawSelectedElements(true);
 		
 		new OverText(this.prefix + '-label-input');
 		
@@ -87,6 +112,14 @@ var mooCompleter = new Class({
 			document.id(this.prefix + '-area').adopt(
 					new Element('div[id="' + this.prefix + '-options-div"][class="' + this.prefix + '-options-div"]')
 			);
+		}
+	},
+	
+	drawSelectedElements: function(initialization,el) {
+		if(initialization) {
+			this.contructSelectedListAtInitialization();
+		} else {
+			this.completeSelectedList(el);
 		}
 	},
 	
@@ -151,16 +184,17 @@ var mooCompleter = new Class({
 	},
 	
 	registerItem: function(el) {
-		if(this.IsItemRegistered(el)) {
-			this.selectedItems.erase(el.getProperty('key'));
+		if(this.IsItemRegistered(el.getProperty('refkey'))) {
+			this.selectedItems.erase(el.getProperty('refkey'));
+			this.destroyElement(el.getProperty('refkey'));
 		} else {
-			this.selectedItems.include(el.getProperty('key'));
-		}
-		console.info(this.selectedItems);
+			this.selectedItems.include(el.getProperty('refkey'));
+			this.drawSelectedElements(false,el);
+		}	
 	},
 	
-	IsItemRegistered: function(el) {
-		return this.selectedItems.contains(el.getProperty('key'));
+	IsItemRegistered: function(key) {
+		return this.selectedItems.contains(key);
 	},
 	
 	isElementEmpty: function(el) {
@@ -211,5 +245,62 @@ var mooCompleter = new Class({
 		} else {
 			el.addClass('selected');
 		}
+	},
+	
+	contructSelectedListAtInitialization: function() {
+		document.id(this.prefix + '-completer-element-container-div').empty();
+		document.id(this.prefix + '-completer-element-container-div').adopt(
+				new Element('ul' + 
+						'[id="' + this.prefix + '-completer-element-container-ul"]' + 
+						'[class="' + this.prefix + '-completer-element-container-ul"]')
+		);
+		Array.each(this.options.data, function(obj, index){
+			if(this.selectedItems.contains(obj.key)) {
+				this.drawElement(obj);
+			}
+		}.bind(this));		
+	},
+	
+	completeSelectedList: function(el) {
+		this.drawElement({key: el.getProperty('refkey'), value: el.getProperty('refvalue')});
+	},
+	
+	drawElement: function(obj, initial){
+		document.id(this.prefix + '-completer-element-container-ul').adopt(
+				new Element('li' +
+						'[id="' + this.prefix + '-completer-element-container-li-' + obj.key + '"]' + 
+						'[class="' + this.prefix + '-completer-element-container-li"]'
+				).adopt(
+						new Element('div[class="shadow-border rounded-corner-5"]').adopt(
+								new Element('div' +
+										'[refkey=' + obj.key + ']' +
+										'[class="' + this.prefix + '-btn-close"]' + 
+										'[text="x"]'
+								),
+								new Element('div' +
+										'[class="' + this.prefix + '-selected-element-value"]' + 
+										'[key="' + obj.key + '"]' +
+										'[text="' + obj.value + '"]'
+								)
+						)
+				)
+		);
+		
+		this.initCloseEvents();
+		this.constructCompleterArea();
+	},
+	
+	initCloseEvents: function() {
+		$$('div.' + this.prefix + '-btn-close').each(function(el) {
+			el.removeEvents('click').addEvent('click', function(e) {
+				e.stop();
+				this.registerItem(el);
+			}.bind(this));
+		}.bind(this));
+	},
+	
+	destroyElement: function(key) {
+		if(document.id(this.prefix + '-completer-element-container-li-' + key))
+			document.id(this.prefix + '-completer-element-container-li-' + key).empty().destroy();
 	}
 });

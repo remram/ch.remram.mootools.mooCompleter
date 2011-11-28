@@ -77,7 +77,7 @@ div.mc-content {
 	width: 200px;
 	height: 20px;
 	border: 1px solid #aaa;
-	background: transparent;
+	background-color: #FAFAFA;
 	padding: .5em;
 	text-shadow: 1px 1px 0px #fff;
 }
@@ -107,7 +107,7 @@ div.mc-content-completer-div {
 	clear: both;
 	width: 98%;
 	border: 1px solid #aaa;
-	background-color: #ccc;
+	background-color: #fff;
 	margin: .5em 0 .5em 0;
 	padding: .2em;	
 }
@@ -140,24 +140,48 @@ li.mc-content-auto-completer-li:hover {
 	color: #111;
 }
 
-ul.mc-content-completer-ul li {
-	width: 99%;
+div.mc-content-completer-element-container-div {
+	clear: both;;
+}
+
+ul.mc-content-completer-element-container-ul li {
 	float: left;
+	margin: .5em .2em .5em .2em;
 }
 
-ul.mc-content-completer-ul li input {
-	width: 100%;
-	/*border: 0 transparent;*/
-	border: 1px solid red;
-	background: transparent;
+li.mc-content-completer-element-container-li div {
+	float: left;
+	height: 20px;
+	padding: .2em .2em 0 0;
 }
 
-ul.mc-content-completer-ul li input.visible {
-	display: inline;
+div.mc-content-btn-close {
+	width: 20px;
+	height: 20px;
+	text-align: center;
+	color: #5882FA;
+	font-size: .8em;
+	font-weight: bold;
+	cursor: pointer;
 }
 
-ul.mc-content-completer-ul li input.hide {
-	display: none;
+div.mc-content-btn-close:hover {
+	color: #FE2E2E;
+}
+
+div.mc-content-selected-element-value {
+	font-size: .8em;
+	font-weight: bold;
+}
+
+div.mc-content-completer-input-div {
+	clear: both;
+}
+
+input.mc-content-autocompleter-input {
+	width: 98%;
+	border: 0px;
+	border-bottom: 1px solid #888; 
 }
 
 ul.mc-content-auto-completer-ul li {
