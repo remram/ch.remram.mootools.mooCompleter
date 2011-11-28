@@ -12,6 +12,7 @@ var mooCompleterAutoList = new Class({
 		this.setOptions(options);
 		this.element        = document.id(el); if (!this.element) return;
 		this.prefix         = this.options.prefix;
+		this.clonedData     = [];
 		this.filterValue    = '';
 		this.filteredArray  = [];
 		this.divAutoList    = {};
@@ -29,7 +30,7 @@ var mooCompleterAutoList = new Class({
 					new Element('input' + 
 							'[id="' + this.prefix + '-autocompleter-input"]' + 
 							'[type="text"]' + 
-							'[title="Search here for an item"]' + 
+							'[title="' + this.options.autoCompleterTextOver + '"]' + 
 							'[class="' + this.prefix + '-autocompleter-input"]'
 					)
 			);
@@ -49,7 +50,14 @@ var mooCompleterAutoList = new Class({
 				if(e.key !== 'up' && e.key !== 'down') {
 					this.filterValue = el.getProperty('value');					
 					this.createFilteredArray();
-				}					
+				} else {
+					if(e.key === 'up') {
+						console.info(this);
+						console.info('UP: ' + el.getProperty('text'));
+					} else if(e.key === 'down'){
+						console.info('DOWN: ' + el.getProperty('text'));
+					}
+				}
 			}.bind(this),
 			
 			'click': function(e) {
@@ -65,9 +73,26 @@ var mooCompleterAutoList = new Class({
 		});
 	},
 	
-	createFilteredArray: function() {
+	destroyDuplicateEntries: function() {
+		var tempArray = [];
+		Array.each(this.options.data, function(obj, index){
+			if(!this.selectedItems.contains(obj.key)) {
+				tempArray.include(obj);
+			}
+		}.bind(this));
+		
+		this.clonedData = Array.clone(tempArray);
+	},
+	
+	createFilteredArray: function() {		
+		if(this.options.unique) {
+			this.destroyDuplicateEntries();
+		} else {
+			this.clonedData = Array.clone(this.options.data);
+		}
+		
 		this.filteredArray = this.highlightFilteredArray( 
-									this.options.data.filter(
+									this.clonedData.filter(
 											function(element, index){
 												return element.value.test(this.filterValue, 'i');
 											}.bind(this)
@@ -126,26 +151,31 @@ var mooCompleterAutoList = new Class({
 			);
 		}.bind(this));
 		
-		this.addKeyboardEvents();
+		this.addAutoCompleterEvents();
 	},
 	
-	addKeyboardEvents: function() {
+	addAutoCompleterEvents: function() {
+		//console.warn($(this.prefix + '-auto-completer-ul').getElements('li').getFirst());
 		$$('li.' + this.prefix + '-auto-completer-li').each(function(el){
 			el.removeEvents(['keyup','click']).addEvents({
-				'keyup': function(e) {
+				'keydown': function(e) {
 					e.stop();				
-					if(e.key === 'up') {
+					/*if(e.key === 'up') {
+						console.info(this);
 						console.info('UP: ' + el.getProperty('text'));
 					} else if(e.key === 'down'){
 						console.info('DOWN: ' + el.getProperty('text'));
-					}
+					}*/
 				}.bind(this),
 				
 				'click': function(e) {
-					e.stop();
+					e.stop();					
 					this.registerItem(el);
+					if(this.options.selectOptions)
+						this.setSelectedItemBgColor(document.id(this.prefix + '-options-li-' + el.getProperty('refkey')));
 					//empty or reset the auto completer input field
 					document.id(this.prefix + '-autocompleter-input').set('value','');
+					this.btnAdd();
 				}.bind(this)
 			});
 		}.bind(this));

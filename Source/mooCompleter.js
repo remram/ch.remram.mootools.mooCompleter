@@ -4,14 +4,14 @@ var mooCompleter = new Class({
 	selectedItems: [],
 	Implements: [Options, Events, mooCompleterAutoList, mooCompleterSelectOptions],
 
-	plugins: [],
-
 	options: {
 		selectOptions: true,
 		data: [],
 		selectedItems: [],
 		overlayLabel: 'Add new item',
 		label: '',
+		labelFieldTextOver: 'Label!',
+		autoCompleterTextOver: 'Search here for an item',
 		unique: true,
 		fxHeight: 300,
 		fxWidth: 600,
@@ -30,11 +30,6 @@ var mooCompleter = new Class({
 		this.overlayLabel   = this.options.label || this.options.overlayLabel;
 		
 		this.constructInputArea();
-		//this.convertDivToInput();
-	},
-	
-	convertDivToInput: function() {
-		this.element.set('text', this.options.data);
 	},
 	
 	checkDataArray: function() {
@@ -73,17 +68,19 @@ var mooCompleter = new Class({
 							e.stop();
 							this.closeContentArea();
 						}.bind(this)),
-						new Element('div[class="' + this.prefix + '-label-div rounded-corner-5"]').adopt(
+						new Element('div' + 
+								'[id="' + this.prefix + '-label-div"]' +
+								'[class="' + this.prefix + '-label-div rounded-corner-5 shadow-border"]').adopt(
 								new Element('input' + 
 										'[id="' + this.prefix + '-label-input"]' + 
 										'[type="text"]' + 
-										'[title="Label!"]' + 
+										'[title="' + this.options.labelFieldTextOver + '"]' + 
 										'[maxlength="23"]' +
 										'[value="' + this.options.label + '"]')
 						),
 						new Element('div' +
 								'[id="' + this.prefix + '-completer-div"]' +
-								'[class="' + this.prefix + '-completer-div clearfix"]'
+								'[class="' + this.prefix + '-completer-div rounded-corner-5 shadow-border clearfix"]'
 						).adopt(
 								new Element('div'+
 										'[id="' + this.prefix + '-completer-input-div"]' +
@@ -186,10 +183,11 @@ var mooCompleter = new Class({
 	registerItem: function(el) {
 		if(this.IsItemRegistered(el.getProperty('refkey'))) {
 			this.selectedItems.erase(el.getProperty('refkey'));
-			this.destroyElement(el.getProperty('refkey'));
+			this.destroyItem(el.getProperty('refkey'));
 		} else {
 			this.selectedItems.include(el.getProperty('refkey'));
 			this.drawSelectedElements(false,el);
+			//this.decorateLists();
 		}	
 	},
 	
@@ -200,6 +198,10 @@ var mooCompleter = new Class({
 	isElementEmpty: function(el) {
 		if(el && el.get('text') === '') return true;
 		return false;
+	},
+	
+	decorateLists: function() {
+		
 	},
 	
 	setLabel: function() {
@@ -271,7 +273,7 @@ var mooCompleter = new Class({
 						'[id="' + this.prefix + '-completer-element-container-li-' + obj.key + '"]' + 
 						'[class="' + this.prefix + '-completer-element-container-li"]'
 				).adopt(
-						new Element('div[class="shadow-border rounded-corner-5"]').adopt(
+						new Element('div[class="rounded-corner-5 shadow"]').adopt(
 								new Element('div' +
 										'[refkey=' + obj.key + ']' +
 										'[class="' + this.prefix + '-btn-close"]' + 
@@ -286,21 +288,40 @@ var mooCompleter = new Class({
 				)
 		);
 		
-		this.initCloseEvents();
+		this.initDestroyItemEvent();
 		this.constructCompleterArea();
+		this.setHeightForSelectOptionArea();
 	},
 	
-	initCloseEvents: function() {
+	initDestroyItemEvent: function() {
 		$$('div.' + this.prefix + '-btn-close').each(function(el) {
 			el.removeEvents('click').addEvent('click', function(e) {
 				e.stop();
+				//try to destroy the highlight of an item in the select option area
+				if(this.options.selectOptions && document.id(this.prefix + '-options-li-' + el.getProperty('refkey')))
+					this.setSelectedItemBgColor(document.id(this.prefix + '-options-li-' + el.getProperty('refkey')));
+				//register an item
 				this.registerItem(el);
 			}.bind(this));
 		}.bind(this));
 	},
 	
-	destroyElement: function(key) {
-		if(document.id(this.prefix + '-completer-element-container-li-' + key))
+	destroyItem: function(key) {
+		if(document.id(this.prefix + '-completer-element-container-li-' + key)) {
 			document.id(this.prefix + '-completer-element-container-li-' + key).empty().destroy();
+			this.setHeightForSelectOptionArea();
+			this.btnAdd();
+		}
+	},
+	
+	setHeightForSelectOptionArea: function() {
+		if(this.options.selectOptions) {
+			var getHeight = this.options.fxHeight - 
+			(document.id(this.prefix + '-btn-add').getStyle('height').toInt() +
+			document.id(this.prefix + '-label-div').getStyle('height').toInt() +
+			document.id(this.prefix + '-completer-div').getStyle('height').toInt() + 70);
+
+			document.id(this.prefix + '-options-div').setStyle('height', getHeight);
+		}
 	}
 });

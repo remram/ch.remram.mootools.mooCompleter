@@ -1,9 +1,11 @@
 window.addEvent('domready', function() {
 	var mc = new mooCompleter('moo-completer', {
-		fxHeight: 500,
+		selectOptions: true,
+		unique: true,
+		fxHeight: 400,
 		fxWidth: 600,
 		data: [
-		       { key: 'key0' , value: 'value0' },
+		       { key: 'key0' , value: 'value0 value0 value0' },
 		       { key: 'key1' , value: 'value1' },
 		       { key: 'key2' , value: 'value2' },
 		       { key: 'key3' , value: 'value3' },
