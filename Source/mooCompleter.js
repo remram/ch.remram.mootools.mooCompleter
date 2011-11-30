@@ -1,7 +1,6 @@
 
 
 var mooCompleter = new Class({
-	selectedItems: [],
 	Implements: [Options, Events, mooCompleterAutoList, mooCompleterSelectOptions],
 
 	options: {
@@ -23,7 +22,7 @@ var mooCompleter = new Class({
 		this.element        = document.id(el); if (!this.element) return;		
 		this.prefix         = this.options.prefix;
 		this.elementSize    = this.element.getSize();
-		this.selectedItems  = this.options.selectedItems || this.selectedItems;
+		this.selectedItems  = this.options.selectedItems;
 		this.morphFx        = {};
 		this.status         = false;
 		this.overlayElement = {};
@@ -196,7 +195,7 @@ var mooCompleter = new Class({
 	},
 	
 	isElementEmpty: function(el) {
-		if(el && el.get('text') === '') return true;
+		if(typeOf(el) == 'element' && el.getProperty('text') == '') return true;
 		return false;
 	},
 	
@@ -268,10 +267,17 @@ var mooCompleter = new Class({
 	},
 	
 	drawElement: function(obj, initial){
+		var borderStyle = 'border: 0;';
+		//for IE-Browsers 8 and lower
+		if(Browser.ie && Browser.version <= 8) {
+			var borderStyle = 'border: 1px solid #999;';
+		}
+		
 		document.id(this.prefix + '-completer-element-container-ul').adopt(
 				new Element('li' +
 						'[id="' + this.prefix + '-completer-element-container-li-' + obj.key + '"]' + 
-						'[class="' + this.prefix + '-completer-element-container-li"]'
+						'[class="' + this.prefix + '-completer-element-container-li"]' + 
+						'[style="' + borderStyle + '"]'
 				).adopt(
 						new Element('div[class="rounded-corner-5 shadow"]').adopt(
 								new Element('div' +

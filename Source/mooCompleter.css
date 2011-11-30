@@ -138,6 +138,13 @@ li.mc-content-auto-completer-li {
 li.mc-content-auto-completer-li:hover {
 	background-color: #e0f2f7;
 	color: #111;
+	font-style: italic;
+}
+
+li.mc-content-auto-completer-li-highlight {
+	background-color: #e0f2f7;
+	color: #111;	
+	font-style: italic;	
 }
 
 div.mc-content-completer-element-container-div {

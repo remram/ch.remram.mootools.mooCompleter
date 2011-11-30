@@ -1,3 +1,9 @@
+Element.implement({
+	setFocus: function(index) {
+		this.setAttribute('tabIndex',index || 0);
+		this.focus();
+	}
+});
 
 var mooCompleterAutoList = new Class({
 	Implements: Options,
@@ -12,12 +18,16 @@ var mooCompleterAutoList = new Class({
 		this.setOptions(options);
 		this.element        = document.id(el); if (!this.element) return;
 		this.prefix         = this.options.prefix;
+		this.inputElement   = {};
+		this.inputOverText  = {};
 		this.clonedData     = [];
 		this.filterValue    = '';
 		this.filteredArray  = [];
 		this.divAutoList    = {};
 		this.ulCompleter    = {};
 		this.keyboardEvents = {};
+		this.selectedElement= {};
+		this.listCnt        = 0;
 	},
 	
 	constructCompleterArea: function() {
@@ -35,42 +45,113 @@ var mooCompleterAutoList = new Class({
 					)
 			);
 		}
+		this.listCnt = 0;
 		//show text over the input field if it is empty!
-		new OverText(this.prefix + '-autocompleter-input');
+		this.inputOverText = new OverText(this.prefix + '-autocompleter-input');
 		//add completer event to input field
 		this.addCompleterEvent();
 	},
 	
 	addCompleterEvent: function() {
-		var el = document.id(this.prefix + '-autocompleter-input');
+		this.inputElement = document.id(this.prefix + '-autocompleter-input');
 		this.createAutoListArea();
-		el.removeEvents(['keyup','click','blur']).addEvents({
+		var ulList = {};
+		
+		this.inputElement.removeEvents().addEvents({
 			'keyup': function(e) {
-				e.stop();					
-				if(e.key !== 'up' && e.key !== 'down') {
-					this.filterValue = el.getProperty('value');					
+				e.stop();
+				this.inputOverText.hide();
+				if(e.key !== 'up' && e.key !== 'down' && e.key !== 'enter') {
+					this.filterValue = this.inputElement.getProperty('value');					
 					this.createFilteredArray();
 				} else {
-					if(e.key === 'up') {
-						console.info(this);
-						console.info('UP: ' + el.getProperty('text'));
-					} else if(e.key === 'down'){
-						console.info('DOWN: ' + el.getProperty('text'));
-					}
+					this.heighlightAutoCompleterElement(e);
 				}
 			}.bind(this),
 			
 			'click': function(e) {
 				e.stop();
-				this.filterValue = el.getProperty('value');					
+				this.filterValue = this.inputElement.getProperty('value');					
 				this.createFilteredArray();
-			}.bind(this),
-			
-			'blur': function(e) {
-				e.stop();
-				this.divAutoList.fade('out');
-			}.bind(this)
+				this.inputOverText.hide();
+				ulList = this.ulCompleter.getChildren();
+			}.bind(this)			
 		});
+		//add blur event on input field
+		this.switchBlurEventOnAutoCompleterField(true);
+	},
+	
+	switchBlurEventOnAutoCompleterField: function(boolean) {
+		if(boolean) {
+			this.inputElement.removeEvents('blur').addEvent('blur', function(e) {
+				e.stop();
+				this.inputOverText.show();
+				this.divAutoList.fade('out');
+			}.bind(this));
+		} else {
+			this.inputElement.removeEvents('blur');
+		}
+	},
+	
+	heighlightAutoCompleterElement: function(event){
+		var arrayList = this.ulCompleter.getChildren();
+		//if element exists! remove highlighting class
+		var hasElement = false;
+		if(typeOf(this.selectedElement) == 'element' ) {
+			this.selectedElement.removeClass(this.prefix + '-auto-completer-li-highlight');
+			hasElement = true;
+		}
+		
+		switch(event.key) {
+			case 'up':
+				//remove blur event on input field
+				this.switchBlurEventOnAutoCompleterField(false);
+				if(hasElement) {					
+					if(this.listCnt <= 0) this.listCnt = arrayList.length - 1;
+					else --this.listCnt;
+				}
+			break;
+			case 'down':
+				//remove blur event on input field
+				this.switchBlurEventOnAutoCompleterField(false);
+				if(hasElement) {
+					if(this.listCnt >= arrayList.length - 1) this.listCnt = 0;
+					else ++this.listCnt;
+				}
+			break;
+			case 'enter':
+				//add blur event on input field
+				this.switchBlurEventOnAutoCompleterField(true);
+				//refocus temporary to another input field 
+				//to trigger the blur event on auto completer field.
+				document.id(this.prefix + '-label-input').focus();
+				
+				this.registerItem(this.selectedElement);
+				if(this.options.selectOptions)
+					this.setSelectedItemBgColor(document.id(this.prefix + '-options-li-' + this.selectedElement.getProperty('refkey')));
+				
+				this.btnAdd();
+				
+				//reset input field
+				this.inputElement.set('value', '');
+				
+				this.selectedElement.empty().destroy();
+				arrayList = this.ulCompleter.getChildren();
+				
+				hasElement = false;
+				this.listCnt = -1;
+			break;
+		}
+		
+		if(this.listCnt >= 0) {
+			this.selectedElement = document.id(arrayList[this.listCnt].get('id'));		
+			if(typeOf(this.selectedElement) == 'element') {
+				this.selectedElement.setFocus(this.selectedElement.getAttribute('tabIndex'));
+				this.selectedElement.addClass(this.prefix + '-auto-completer-li-highlight');
+			}
+			
+		}
+		this.inputElement.setFocus();
 	},
 	
 	destroyDuplicateEntries: function() {
@@ -121,16 +202,15 @@ var mooCompleterAutoList = new Class({
 	},
 	
 	createAutoListArea: function() {
-		var inputElement = document.id(this.prefix + '-autocompleter-input');
 		this.divAutoList = new Element('div' +
 				'[id="' + this.prefix + '-auto-completer-list-area"]' + 
 				'[class="' + this.prefix + '-auto-completer-list-area rounded-corner-bottom"]'
 		).setStyles({
-			top        : inputElement.getCoordinates().bottom,
-			left       : inputElement.getCoordinates().left + 2,			
-			width      : inputElement.getCoordinates().width - 10,
+			top        : this.inputElement.getCoordinates().bottom,
+			left       : this.inputElement.getCoordinates().left + 2,			
+			width      : this.inputElement.getCoordinates().width - 10,
 			visibility : 'hidden'
-		}).inject(inputElement, 'after');
+		}).inject(this.inputElement, 'after');
 	},
 	
 	buildFilteredList: function() {
@@ -145,8 +225,9 @@ var mooCompleterAutoList = new Class({
 							'[id="' + this.prefix + '-auto-completer-li-' + value[0] + '"]' + 
 							'[refkey="' + value[0] + '"]' +
 							'[refvalue="' + value[1] + '"]' +
-							'[class="' + this.prefix + '-auto-completer-li"]').adopt(
-									new Element('span[html="' + value[2] + '"]')
+							'[class="' + this.prefix + '-auto-completer-li"]' + 
+							'[tabindex="' + index + '"]'
+							).adopt( new Element('span[html="' + value[2] + '"]')
 					)
 			);
 		}.bind(this));
@@ -155,62 +236,21 @@ var mooCompleterAutoList = new Class({
 	},
 	
 	addAutoCompleterEvents: function() {
-		//console.warn($(this.prefix + '-auto-completer-ul').getElements('li').getFirst());
+		this.inputOverText.show();
 		$$('li.' + this.prefix + '-auto-completer-li').each(function(el){
-			el.removeEvents(['keyup','click']).addEvents({
-				'keydown': function(e) {
-					e.stop();				
-					/*if(e.key === 'up') {
-						console.info(this);
-						console.info('UP: ' + el.getProperty('text'));
-					} else if(e.key === 'down'){
-						console.info('DOWN: ' + el.getProperty('text'));
-					}*/
-				}.bind(this),
-				
-				'click': function(e) {
+			el.removeEvents().addEvent('click', function(e) {
 					e.stop();					
 					this.registerItem(el);
 					if(this.options.selectOptions)
 						this.setSelectedItemBgColor(document.id(this.prefix + '-options-li-' + el.getProperty('refkey')));
 					//empty or reset the auto completer input field
-					document.id(this.prefix + '-autocompleter-input').set('value','');
+					this.inputElement.set('value','');
 					this.btnAdd();
-				}.bind(this)
-			});
+					//add blur event on input field
+					this.switchBlurEventOnAutoCompleterField(true);
+			}.bind(this));
 		}.bind(this));
 	},
-	
-	/*itemHover: function(select) {
-		var current = this.ulCompleter.getElement('li.'+this.prefix + '-auto-completer-li');
-
-		switch (select) {
-			case 'down':
-				if (current && (sibling = current.getNext())) el.getProperty('text');
-				else this.itemHover(this.ulCompleter, 'last');
-				break;
- 			case 'up':
-				if (current && (sibling = current.getPrevious())) el.getProperty('text');
-				else this.itemHover(this.ulCompleter, 'first');
-				break;
-			case 'none':
-				//this.ulCompleter.getElements('li.'+this.prefix + '-auto-completer-li').removeClass(this.options.itemHoverClass);
-				break;
-			case 'first':
-				var sibling = this.ulCompleter.getFirst();
-				break;
-			case 'last':
-				var sibling = this.ulCompleter.getLast();
-				break;
-			default:
-				//if (current) current.removeClass(this.options.itemHoverClass);
-				var sibling = select;
-				break;
-		}
-
-		if (sibling) 
-			sibling.focus();
-	},*/
 	
 	cleanCompleterList: function() {
 		if(this.ulCompleter && !this.isElementEmpty(this.ulCompleter)) {
