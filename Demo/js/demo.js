@@ -17,6 +17,9 @@ window.addEvent('domready', function() {
 		       { key: 'key9' , value: 'value9' },
 		       { key: 'key10' , value: 'value10' }
 		],
-		selectedItems: ['key1','key3']
+		selectedItems: ['key1','key3'],
+		onComplete: function(items) {
+			console.warn(items);
+		}
 	});
 });

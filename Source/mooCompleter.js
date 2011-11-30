@@ -19,14 +19,15 @@ var mooCompleter = new Class({
 
 	initialize: function(el,options){
 		this.setOptions(options);
-		this.element        = document.id(el); if (!this.element) return;		
-		this.prefix         = this.options.prefix;
-		this.elementSize    = this.element.getSize();
-		this.selectedItems  = this.options.selectedItems;
-		this.morphFx        = {};
-		this.status         = false;
-		this.overlayElement = {};
-		this.overlayLabel   = this.options.label || this.options.overlayLabel;
+		this.element                    = document.id(el); if (!this.element) return;		
+		this.prefix                     = this.options.prefix;
+		this.elementSize                = this.element.getSize();
+		this.selectedItems              = this.options.selectedItems;
+		this.selectedItemsInitialLength = this.selectedItems.length;
+		this.morphFx                    = {};
+		this.status                     = false;
+		this.overlayElement             = {};
+		this.overlayLabel               = this.options.label || this.options.overlayLabel;
 		
 		this.constructInputArea();
 	},
@@ -59,7 +60,11 @@ var mooCompleter = new Class({
 								'[id="' + this.prefix + '-btn-add"]' +
 								'[class="' + this.prefix + '-btn-add rounded-corner-bottom"]' +
 								'[text="' + this.btnAdd('get') + '"]'
-						),
+						).removeEvents('click').addEvent('click', function(e){
+							e.stop();
+							this.closeContentArea();
+							this.fireEvent('complete', [this.getItems(), this.element]);
+						}.bind(this)),
 						new Element('div' + 
 								'[class="' + this.prefix + '-btn-cancel rounded-corner-bottom clearfix"]' + 
 								'[text="Cancel"]'
@@ -103,6 +108,10 @@ var mooCompleter = new Class({
 		this.showContentArea();
 	},
 	
+	getItems: function() {
+		return this.selectedItems;
+	},
+	
 	constructSelectOption: function() {
 		if(this.options.selectOptions) {
 			document.id(this.prefix + '-area').adopt(
@@ -122,7 +131,7 @@ var mooCompleter = new Class({
 	btnAdd: function(action) {
 		action = action || 'update';
 		var btnAdd = 'Add';
-		if(this.selectedItems.length >= 1) btnAdd = 'Update';
+		if(this.selectedItemsInitialLength >= 1) btnAdd = 'Update';
 		if(action === 'get') return btnAdd;
 		
 		if(document.id(this.prefix + '-btn-add'))
@@ -176,7 +185,6 @@ var mooCompleter = new Class({
 		document.id(this.prefix + '-label-input').removeEvents('keyup').addEvent('keyup', function(e) {
 			this.overlayLabel = document.id(this.prefix + '-label-input').get('value') || this.options.overlayLabel;
 		}.bind(this));
-		//this.element.getElements('ul li span').highlight();
 	},
 	
 	registerItem: function(el) {
