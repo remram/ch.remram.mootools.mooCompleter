@@ -97,9 +97,9 @@ var mooCompleterAutoList = new Class({
 	},
 	
 	heighlightAutoCompleterElement: function(event){
-		var arrayList = this.ulCompleter.getChildren();
-		//if element exists! remove highlighting class
+		var arrayList  = this.ulCompleter.getChildren();
 		var hasElement = false;
+		//if element exists! remove highlighting class
 		if(typeOf(this.selectedElement) == 'element' ) {
 			this.selectedElement.removeClass(this.prefix + '-auto-completer-li-highlight');
 			hasElement = true;
@@ -112,6 +112,7 @@ var mooCompleterAutoList = new Class({
 				if(hasElement) {					
 					if(this.listCnt <= 0) this.listCnt = arrayList.length - 1;
 					else --this.listCnt;
+					this.highlightElement(arrayList);
 				}
 			break;
 			case 'down':
@@ -120,42 +121,65 @@ var mooCompleterAutoList = new Class({
 				if(hasElement) {
 					if(this.listCnt >= arrayList.length - 1) this.listCnt = 0;
 					else ++this.listCnt;
+					this.highlightElement(arrayList);
 				}
 			break;
 			case 'enter':
-				//add blur event on input field
-				this.switchBlurEventOnAutoCompleterField(true);
-				document.id(this.prefix + '-label-input').focus();
-				document.id(this.prefix + '-label-input').setFocus();
-				this.divAutoList.fade('out');
+				if(hasElement) {
+					console.info('1. hasElement? ', hasElement);
+					//add blur event on input field
+					this.switchBlurEventOnAutoCompleterField(true);
+					document.id(this.prefix + '-label-input').focus();
+					document.id(this.prefix + '-label-input').setFocus();
+					this.divAutoList.fade('out');
+					
+					this.registerItem(this.selectedElement);
+					if(this.options.selectOptions)
+						this.setSelectedItemBgColor(document.id(this.prefix + '-options-li-' + this.selectedElement.getProperty('refkey')));
+					
+					this.btnAdd();
+					this.selectedElement.empty().destroy();
+					
+					
+					
+				} else {
+					console.info('2. hasElement? ', hasElement);
+					this.listCnt = -1;
+				}
 				
-				if(!this.isElementEmpty(this.inputElement, 'value') && 
+				//reset input field
+				this.inputElement.set('value', '');
+				//arrayList = this.ulCompleter.getChildren();
+				
+				/*if(!this.isElementEmpty(this.inputElement, 'value') && 
 						!this.isElementEmpty(this.selectedElement, 'html')) {
 					this.registerItem(this.selectedElement);
 					if(this.options.selectOptions)
 						this.setSelectedItemBgColor(document.id(this.prefix + '-options-li-' + this.selectedElement.getProperty('refkey')));
 					
 					this.btnAdd();
-					this.selectedElement.empty().destroy();						
-				}
-				//reset input field
-				this.inputElement.set('value', '');
-				arrayList = this.ulCompleter.getChildren();
+					this.selectedElement.empty().destroy();
+				}*/
 				
-				hasElement = false;
-				this.listCnt = -1;
+				
+				//hasElement = false;
+				
 			break;
 		}
 		
+		
+		this.inputElement.setFocus();
+	},
+	
+	highlightElement: function(arrayList) {
 		if(this.listCnt >= 0 && arrayList[this.listCnt]) {
+			console.warn('enter IF:');
 			this.selectedElement = document.id(arrayList[this.listCnt].get('id'));		
 			if(typeOf(this.selectedElement) == 'element') {
 				this.selectedElement.setFocus(this.selectedElement.getAttribute('tabIndex'));
 				this.selectedElement.addClass(this.prefix + '-auto-completer-li-highlight');
 			}
-			
 		}
-		this.inputElement.setFocus();
 	},
 	
 	destroyDuplicateEntries: function() {
@@ -180,8 +204,7 @@ var mooCompleterAutoList = new Class({
 									this.clonedData.filter(
 											function(element, index){
 												return element.value.test(this.filterValue, 'i');
-											}.bind(this)
-									) 
+											}.bind(this)) 
 							);
 		
 		this.cleanCompleterList();
