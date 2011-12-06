@@ -87,11 +87,12 @@ div.moo-completer_overlay {
 	font-size: 1.1em;
 	font-weight: bold;
 	text-align: center;
-	background-color: #bdbdbd;
+	background-color: #FAFAFA;
 }
 
 div.moo-completer_overlay:hover {
 	color: #0B55C4;
+	background-color: #E6E6E6;
 }
 
 div.mc-content ul {
@@ -208,33 +209,16 @@ div.mc-content-btn-add {
 	padding: .2em;
 	text-align: center;
 	cursor: pointer;
-	background-color: #d8d8d8;
+	background-color: #FAFAFA;
 }
 
 div.mc-content-btn-add:hover {
 	color: #0B55C4;
-	background-color: #bdbdbd;
-}
-
-div.mc-content-btn-cancel {
-	float: left;
-	width: 70px;
-	font-weight: bold;
-	border: 1px solid #aaa;
-	margin: 0 0 .5em 1em;
-	padding: .2em;
-	text-align: center;
-	cursor: pointer;
-	background-color: #d8d8d8;
-}
-
-div.mc-content-btn-cancel:hover {
-	color: #0B55C4;
-	background-color: #bdbdbd;
+	background-color: #E6E6E6;
 }
 
 /**
- * Lable input area
+ * Label input area
  */
 div.mc-content-label-div {
 	clear: both;

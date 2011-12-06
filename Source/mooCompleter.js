@@ -4,17 +4,17 @@ var mooCompleter = new Class({
 	Implements: [Options, Events, mooCompleterAutoList, mooCompleterSelectOptions],
 
 	options: {
-		selectOptions: true,
-		data: [],
-		selectedItems: [],
-		overlayLabel: 'Add new item',
-		label: '',
-		labelFieldTextOver: 'Label!',
-		autoCompleterTextOver: 'Search here for an item',
-		unique: true,
-		fxHeight: 300,
-		fxWidth: 600,
-		prefix: 'mc-content'
+		selectOptions         : true,
+		data                  : [],
+		selectedItems         : [],
+		overlayLabel          : 'Add new item',
+		label                 : '',
+		labelFieldTextOver    : 'Label!',
+		autoCompleterTextOver : 'Search here for an item',
+		unique                : true,
+		fxHeight              : 300,
+		fxWidth               : 600,
+		prefix                : 'mc-content'
 	},
 
 	initialize: function(el,options){
@@ -58,19 +58,12 @@ var mooCompleter = new Class({
 				new Element('div[id="' + this.prefix + '-area"][style="visibility: hidden;"]').adopt(
 						new Element('div' + 
 								'[id="' + this.prefix + '-btn-add"]' +
-								'[class="' + this.prefix + '-btn-add rounded-corner-bottom"]' +
+								'[class="' + this.prefix + '-btn-add rounded-corner-bottom shadow-border clearfix"]' +
 								'[text="' + this.btnAdd('get') + '"]'
 						).removeEvents('click').addEvent('click', function(e){
 							e.stop();
 							this.closeContentArea();
 							this.fireEvent('complete', [this.getItems(), this.element]);
-						}.bind(this)),
-						new Element('div' + 
-								'[class="' + this.prefix + '-btn-cancel rounded-corner-bottom clearfix"]' + 
-								'[text="Cancel"]'
-						).removeEvents('click').addEvent('click', function(e){
-							e.stop();
-							this.closeContentArea();
 						}.bind(this)),
 						new Element('div' + 
 								'[id="' + this.prefix + '-label-div"]' +
@@ -188,13 +181,17 @@ var mooCompleter = new Class({
 	},
 	
 	registerItem: function(el) {
+		if(typeOf(el) != 'element') return null;
 		if(this.IsItemRegistered(el.getProperty('refkey'))) {
 			this.selectedItems.erase(el.getProperty('refkey'));
 			this.destroyItem(el.getProperty('refkey'));
+			//fire deselect event
+			this.fireEvent('deSelect', [el, this.element]);
 		} else {
 			this.selectedItems.include(el.getProperty('refkey'));
 			this.drawSelectedElements(false,el);
-			//this.decorateLists();
+			//fire select event
+			this.fireEvent('select', [el, this.element]);
 		}	
 	},
 	
@@ -202,13 +199,9 @@ var mooCompleter = new Class({
 		return this.selectedItems.contains(key);
 	},
 	
-	isElementEmpty: function(el) {
-		if(typeOf(el) == 'element' && el.getProperty('text') == '') return true;
+	isElementEmpty: function(el, property) {
+		if(typeOf(el) == 'element' && el.getProperty(property) == '') return true;
 		return false;
-	},
-	
-	decorateLists: function() {
-		
 	},
 	
 	setLabel: function() {
@@ -249,6 +242,7 @@ var mooCompleter = new Class({
 	},
 	
 	setSelectedItemBgColor: function(el) {
+		if(typeOf(el) != 'element') return null;
 		if(el.hasClass('selected')) {
 			el.removeClass('selected');
 		} else {
@@ -263,6 +257,7 @@ var mooCompleter = new Class({
 						'[id="' + this.prefix + '-completer-element-container-ul"]' + 
 						'[class="' + this.prefix + '-completer-element-container-ul"]')
 		);
+
 		Array.each(this.options.data, function(obj, index){
 			if(this.selectedItems.contains(obj.key)) {
 				this.drawElement(obj);
@@ -271,6 +266,7 @@ var mooCompleter = new Class({
 	},
 	
 	completeSelectedList: function(el) {
+		if(typeOf(el) != 'element') return null;
 		this.drawElement({key: el.getProperty('refkey'), value: el.getProperty('refvalue')});
 	},
 	
@@ -315,7 +311,7 @@ var mooCompleter = new Class({
 				if(this.options.selectOptions && document.id(this.prefix + '-options-li-' + el.getProperty('refkey')))
 					this.setSelectedItemBgColor(document.id(this.prefix + '-options-li-' + el.getProperty('refkey')));
 				//register an item
-				this.registerItem(el);
+				this.registerItem(document.id('mc-content-options-li-' + el.getProperty('refkey')));
 			}.bind(this));
 		}.bind(this));
 	},

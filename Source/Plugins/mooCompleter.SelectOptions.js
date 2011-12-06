@@ -23,7 +23,7 @@ var mooCompleterSelectOptions = new Class({
 		this.optionDiv = document.id(this.prefix + '-options-div');
 		this.setHeightForSelectOptionArea();
 		
-		if(this.isElementEmpty(this.optionDiv)) {
+		if(this.isElementEmpty(this.optionDiv, 'html')) {
 			this.optionDiv.empty().addClass('rounded-corner-5 shadow-border').adopt(
 					this.ul = new Element('ul[id="' + this.prefix + '-options-ul" class="' + this.prefix + '-options-ul"]')
 			);

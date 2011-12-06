@@ -18,8 +18,14 @@ window.addEvent('domready', function() {
 		       { key: 'key10' , value: 'value10' }
 		],
 		selectedItems: ['key1','key3'],
-		onComplete: function(items) {
-			console.warn(items);
+		onComplete: function(items, element) {
+			new Element('div[style="clear: both;"][html="<b>Selected Array:</b> ' + items + '"]').inject(element,'after');
+		},
+		onSelect: function(item, element) {
+			new Element('div[style="clear: both;"][html="<b>Selected Item:</b> ' + item.get('text') + '"]').inject(element,'after');
+		},
+		onDeSelect: function(item, element) {
+			new Element('div[style="clear: both;"][html="<b>DeSelected Item:</b> ' + item.get('text') + '"]').inject(element,'after');
 		}
 	});
 });

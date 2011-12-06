@@ -1,9 +1,11 @@
-Element.implement({
-	setFocus: function(index) {
-		this.setAttribute('tabIndex',index || 0);
-		this.focus();
-	}
-});
+(function(){
+	Element.implement({
+		setFocus: function(index) {
+			this.setAttribute('tabIndex',index || 0);
+			this.focus();
+		}
+	});
+})();
 
 var mooCompleterAutoList = new Class({
 	Implements: Options,
@@ -35,7 +37,7 @@ var mooCompleterAutoList = new Class({
 		
 		this.completerDiv = document.id(this.prefix + '-completer-input-div');
 		
-		if(this.isElementEmpty(this.completerDiv)) {
+		if(this.isElementEmpty(this.completerDiv,'html')) {
 			this.completerDiv.empty().addClass('rounded-corner-5').adopt(
 					new Element('input' + 
 							'[id="' + this.prefix + '-autocompleter-input"]' + 
@@ -54,6 +56,7 @@ var mooCompleterAutoList = new Class({
 	
 	addCompleterEvent: function() {
 		this.inputElement = document.id(this.prefix + '-autocompleter-input');
+		
 		this.createAutoListArea();
 		var ulList = {};
 		
@@ -122,20 +125,21 @@ var mooCompleterAutoList = new Class({
 			case 'enter':
 				//add blur event on input field
 				this.switchBlurEventOnAutoCompleterField(true);
-				//refocus temporary to another input field 
-				//to trigger the blur event on auto completer field.
 				document.id(this.prefix + '-label-input').focus();
+				document.id(this.prefix + '-label-input').setFocus();
+				this.divAutoList.fade('out');
 				
-				this.registerItem(this.selectedElement);
-				if(this.options.selectOptions)
-					this.setSelectedItemBgColor(document.id(this.prefix + '-options-li-' + this.selectedElement.getProperty('refkey')));
-				
-				this.btnAdd();
-				
+				if(!this.isElementEmpty(this.inputElement, 'value') && 
+						!this.isElementEmpty(this.selectedElement, 'html')) {
+					this.registerItem(this.selectedElement);
+					if(this.options.selectOptions)
+						this.setSelectedItemBgColor(document.id(this.prefix + '-options-li-' + this.selectedElement.getProperty('refkey')));
+					
+					this.btnAdd();
+					this.selectedElement.empty().destroy();						
+				}
 				//reset input field
 				this.inputElement.set('value', '');
-				
-				this.selectedElement.empty().destroy();
 				arrayList = this.ulCompleter.getChildren();
 				
 				hasElement = false;
@@ -143,7 +147,7 @@ var mooCompleterAutoList = new Class({
 			break;
 		}
 		
-		if(this.listCnt >= 0) {
+		if(this.listCnt >= 0 && arrayList[this.listCnt]) {
 			this.selectedElement = document.id(arrayList[this.listCnt].get('id'));		
 			if(typeOf(this.selectedElement) == 'element') {
 				this.selectedElement.setFocus(this.selectedElement.getAttribute('tabIndex'));
@@ -253,7 +257,7 @@ var mooCompleterAutoList = new Class({
 	},
 	
 	cleanCompleterList: function() {
-		if(this.ulCompleter && !this.isElementEmpty(this.ulCompleter)) {
+		if(this.ulCompleter && !this.isElementEmpty(this.ulCompleter,'html')) {
 			this.ulCompleter.empty().destroy();
 		}
 	}
