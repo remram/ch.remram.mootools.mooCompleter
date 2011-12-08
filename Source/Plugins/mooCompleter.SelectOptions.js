@@ -1,37 +1,23 @@
 
 var mooCompleterSelectOptions = new Class({
-	
-	Implements: Options,
-	
-	options: {
-		selectOptions: true,
-		data: [],
-		unique: true,
-		prefix: 'mc-content'
-	},
-
-	initialize: function(el,options){
-		this.element = document.id(el); if (!this.element) return;
-		this.setOptions(options);
-		this.prefix  = this.options.prefix;
+	initialize: function(){
 		this.ul      = {};
 	},
 	
-	constructSelectOptionArea: function() {
-		if(!document.id(this.prefix + '-options-div')) return null;
+	constructSelectOptionArea: function() {		
+		if(!document.id(this.elId + '-options-div')) return null;
 		
-		this.optionDiv = document.id(this.prefix + '-options-div');
+		this.optionDiv = document.id(this.elId + '-options-div');
 		this.setHeightForSelectOptionArea();
 		
 		if(this.isElementEmpty(this.optionDiv, 'html')) {
-			this.optionDiv.empty().addClass('rounded-corner-5 shadow-border').adopt(
-					this.ul = new Element('ul[id="' + this.prefix + '-options-ul" class="' + this.prefix + '-options-ul"]')
-			);
+			this.ul = new Element('ul[id="' + this.elId + '-options-ul"][class="' + this.prefix + '-options-ul"]');
+			this.optionDiv.empty().addClass('rounded-corner-5 shadow-border').adopt(this.ul);
 			
 			Array.each(this.options.data, function(obj, index){
 				this.ul.adopt(
 						new Element('li' + 
-								'[id="' + this.prefix + '-options-li-' + obj.key + '"]' + 
+								'[id="' + this.elId + '-options-li-' + obj.key + '"]' + 
 								'[refkey="' + obj.key + '"]' +
 								'[refvalue="' + obj.value + '"]' +
 								'[class="' + this.prefix + '-options-li rounded-corner-top-5 shadow-border"]').adopt(
@@ -47,7 +33,7 @@ var mooCompleterSelectOptions = new Class({
 	},
 	
 	addOptionEvent: function() {
-		$$('li.' + this.prefix + '-options-li').each(function(el){
+		$$('ul#' + this.ul.get('id') + ' li.' + this.prefix + '-options-li').each(function(el){
 			el.removeEvents('click').addEvent('click', function(e) {
 				e.stop();
 				this.setSelectedItemBgColor(el);
@@ -58,7 +44,7 @@ var mooCompleterSelectOptions = new Class({
 	},
 	
 	initPreSelectedItems: function() {
-		$$('li.' + this.prefix + '-options-li').each(function(el){
+		$$('ul#' + this.ul.get('id') + ' li.' + this.prefix + '-options-li').each(function(el){
 			if(this.IsItemRegistered(el.getProperty('refkey'))) {
 				this.setSelectedItemBgColor(el);
 			}

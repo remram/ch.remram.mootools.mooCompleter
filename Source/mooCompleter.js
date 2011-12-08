@@ -1,5 +1,4 @@
 
-
 var mooCompleter = new Class({
 	Implements: [Options, Events, mooCompleterAutoList, mooCompleterSelectOptions],
 
@@ -10,6 +9,7 @@ var mooCompleter = new Class({
 		overlayLabel          : 'Add new item',
 		label                 : '',
 		labelFieldTextOver    : 'Label!',
+		labelTextMaxLength    : 20,
 		autoCompleterTextOver : 'Search here for an item',
 		unique                : true,
 		fxHeight              : 300,
@@ -19,7 +19,11 @@ var mooCompleter = new Class({
 
 	initialize: function(el,options){
 		this.setOptions(options);
-		this.element                    = document.id(el); if (!this.element) return;		
+		this.element                    = document.id(el); if (!this.element) return;
+		//checks for main element
+		if(!this.checkMainElement(this.element)) return;
+
+		this.elId                       = this.element.getProperty('id');
 		this.prefix                     = this.options.prefix;
 		this.elementSize                = this.element.getSize();
 		this.selectedItems              = this.options.selectedItems;
@@ -29,7 +33,23 @@ var mooCompleter = new Class({
 		this.overlayElement             = {};
 		this.overlayLabel               = this.options.label || this.options.overlayLabel;
 		
+		this.cleanLabelInput();
 		this.constructInputArea();
+	},
+	
+	checkMainElement: function(element) {
+		if(!this.isElementEmpty(element, 'html')) {
+			alert('Warning: Declaration for element [' + element.getProperty('id') + '] was wrong!\n It could have been added a few times!');
+			return false;
+		}
+		return true;
+	},
+	
+	cleanLabelInput: function() {
+		this.overlayLabel = this.overlayLabel.clean().stripTags().stripScripts();
+		if(this.overlayLabel.length >= this.options.labelTextMaxLength) {
+			this.overlayLabel = this.overlayLabel.substr(0,(this.options.labelTextMaxLength-3)) + '...';
+		}
 	},
 	
 	checkDataArray: function() {
@@ -40,6 +60,10 @@ var mooCompleter = new Class({
 			}
 		});
 		return boolean;
+	},
+	
+	getWidthAsPercentage: function(percent) {
+		return this.options.fxWidth * (percent * 0.01);
 	},
 	
 	constructInputArea: function() {
@@ -55,36 +79,41 @@ var mooCompleter = new Class({
 		this.switchOverlay();
 		
 		this.element.adopt(
-				new Element('div[id="' + this.prefix + '-area"][style="visibility: hidden;"]').adopt(
+				new Element('div[id="' + this.elId + '-area"][class="' + this.prefix + '-area"][style="visibility: hidden; width: ' + this.getWidthAsPercentage(100) + 'px"]').adopt(
 						new Element('div' + 
-								'[id="' + this.prefix + '-btn-add"]' +
+								'[id="' + this.elId + '-btn-add"]' +
 								'[class="' + this.prefix + '-btn-add rounded-corner-bottom shadow-border clearfix"]' +
 								'[text="' + this.btnAdd('get') + '"]'
 						).removeEvents('click').addEvent('click', function(e){
 							e.stop();
+							this.cleanLabelInput();
+							//destroy the auto list of auto completer
+							this.destroyAutoList();
+							//close area and view it as a button
 							this.closeContentArea();
+							//execute the onComplete event
 							this.fireEvent('complete', [this.getItems(), this.element]);
 						}.bind(this)),
 						new Element('div' + 
-								'[id="' + this.prefix + '-label-div"]' +
-								'[class="' + this.prefix + '-label-div rounded-corner-5 shadow-border"]').adopt(
+								'[id="' + this.elId + '-label-div"]' +
+								'[class="' + this.prefix + '-label-div rounded-corner-5 shadow-border clearfix"]').adopt(
 								new Element('input' + 
-										'[id="' + this.prefix + '-label-input"]' + 
+										'[id="' + this.elId + '-label-input"]' + 
 										'[type="text"]' + 
 										'[title="' + this.options.labelFieldTextOver + '"]' + 
-										'[maxlength="23"]' +
+										'[maxlength="' + this.options.labelTextMaxLength + '"]' +
 										'[value="' + this.options.label + '"]')
 						),
 						new Element('div' +
-								'[id="' + this.prefix + '-completer-div"]' +
+								'[id="' + this.elId + '-completer-div"]' +
 								'[class="' + this.prefix + '-completer-div rounded-corner-5 shadow-border clearfix"]'
 						).adopt(
 								new Element('div'+
-										'[id="' + this.prefix + '-completer-input-div"]' +
+										'[id="' + this.elId + '-completer-input-div"]' +
 										'[class="' + this.prefix + '-completer-input-div"]'
 								),
 								new Element('div'+
-										'[id="' + this.prefix + '-completer-element-container-div"]' +
+										'[id="' + this.elId + '-completer-element-container-div"]' +
 										'[class="' + this.prefix + '-completer-element-container-div"]'
 								)
 						)
@@ -96,7 +125,7 @@ var mooCompleter = new Class({
 		
 		this.drawSelectedElements(true);
 		
-		new OverText(this.prefix + '-label-input');
+		new OverText(this.elId + '-label-input');
 		
 		this.showContentArea();
 	},
@@ -107,8 +136,8 @@ var mooCompleter = new Class({
 	
 	constructSelectOption: function() {
 		if(this.options.selectOptions) {
-			document.id(this.prefix + '-area').adopt(
-					new Element('div[id="' + this.prefix + '-options-div"][class="' + this.prefix + '-options-div"]')
+			document.id(this.elId + '-area').adopt(
+					new Element('div[id="' + this.elId + '-options-div"][class="' + this.prefix + '-options-div"]')
 			);
 		}
 	},
@@ -127,22 +156,22 @@ var mooCompleter = new Class({
 		if(this.selectedItemsInitialLength >= 1) btnAdd = 'Update';
 		if(action === 'get') return btnAdd;
 		
-		if(document.id(this.prefix + '-btn-add'))
-			document.id(this.prefix + '-btn-add').empty().set('text', btnAdd);
+		if(document.id(this.elId + '-btn-add'))
+			document.id(this.elId + '-btn-add').empty().set('text', btnAdd);
 	},
 
 	showContentArea: function() {
 		this.overlayElement.removeEvents('click').addEvent('click', function(e){
-			e.stop();
+			e.stop();			
 			if(!Object.getFromPath(this.morphFx, 'element')) {
 				this.morphFx = new Fx.Morph(this.element, {
-				    onComplete: function(element){
-				    	document.id(this.prefix + '-area').setStyle('visibility', 'visible');
+					onComplete: function() {
+						document.id(this.elId + '-area').setStyle('visibility', 'visible');
 				    	this.addInputEvents();
 				    	this.overlayElement.removeEvents('click');
 				    	this.constructCompleterArea();
 				    	this.constructSelectOptionArea();
-				    }.bind(this)
+					}.bind(this)
 				});
 			}
 			
@@ -152,16 +181,15 @@ var mooCompleter = new Class({
 			}).chain(function(){
 				this.status = true;
 				this.switchOverlay();
-				document.id(this.prefix + '-area').fade('in');
+				document.id(this.elId + '-area').fade('in');
 				this.element.setStyle('cursor','default').addClass('shadow');				
 				this.setLabel();
 			}.bind(this));
 		}.bind(this));
 	},
 	
-	closeContentArea: function() {
-		document.id(this.prefix + '-area').fade('out');
-		
+	closeContentArea: function() {		
+		document.id(this.elId + '-area').fade('out');
 		this.morphFx.start({
 			'height': [this.options.fxHeight, (this.elementSize.y - 15)],
 			'width' : [this.options.fxWidth , (this.elementSize.x - 15)]
@@ -175,8 +203,8 @@ var mooCompleter = new Class({
 	},
 	
 	addInputEvents: function() {
-		document.id(this.prefix + '-label-input').removeEvents('keyup').addEvent('keyup', function(e) {
-			this.overlayLabel = document.id(this.prefix + '-label-input').get('value') || this.options.overlayLabel;
+		document.id(this.elId + '-label-input').removeEvents('keyup').addEvent('keyup', function(e) {
+			this.overlayLabel = document.id(this.elId + '-label-input').get('value') || this.options.overlayLabel;
 		}.bind(this));
 	},
 	
@@ -192,7 +220,7 @@ var mooCompleter = new Class({
 			this.drawSelectedElements(false,el);
 			//fire select event
 			this.fireEvent('select', [el, this.element]);
-		}	
+		}
 	},
 	
 	IsItemRegistered: function(key) {
@@ -200,8 +228,20 @@ var mooCompleter = new Class({
 	},
 	
 	isElementEmpty: function(el, property) {
-		if(typeOf(el) == 'element' && el.getProperty(property) == '') return true;
-		return false;
+		if(typeOf(el).test('element')){
+			//workaround for ugly and unprofessional browser like ie8 and less! 
+			if(Browser.ie && Browser.version < 9) {
+				if(property == 'html'){
+					if(el.innerHTML) return false;
+				} else {
+					if(el.getAttribute(property).test(/\w+/)) return false;
+				}
+				return true;
+			} 
+			
+			if(el.getProperty(property).test(/\w+/)) return false;
+			return true;
+		}
 	},
 	
 	setLabel: function() {
@@ -219,7 +259,7 @@ var mooCompleter = new Class({
 		var element = original.clone()
 								  .inject(original, injection)
 								  .setProperty('id', original.getProperty('id') + suffix)
-								  .addClass(original.getProperty('id') + suffix)
+								  .addClass(this.prefix + suffix)
 								  .setStyles({
 									    top: original.getCoordinates().top,
 									    right: original.getCoordinates().right - 15,
@@ -233,11 +273,23 @@ var mooCompleter = new Class({
 	
 	switchOverlay: function() {
 		if(this.status) {
-			this.element.setStyle('visibility','visible');
-			this.overlayElement.setStyle('visibility','hidden');
+			this.element.setStyles({
+				visibility: 'visible',
+				zIndex: 3
+			});
+			this.overlayElement.setStyles({
+				visibility:'hidden',
+				zIndex: -1
+			});
 		} else {
-			this.element.setStyle('visibility','hidden');
-			this.overlayElement.setStyle('visibility','visible');
+			this.element.setStyles({
+				visibility:'hidden',
+				zIndex: -1
+			});
+			this.overlayElement.setStyles({
+				visibility:'visible',
+				zIndex: 1
+			});
 		}
 	},
 	
@@ -251,10 +303,10 @@ var mooCompleter = new Class({
 	},
 	
 	contructSelectedListAtInitialization: function() {
-		document.id(this.prefix + '-completer-element-container-div').empty();
-		document.id(this.prefix + '-completer-element-container-div').adopt(
+		document.id(this.elId + '-completer-element-container-div').empty();
+		document.id(this.elId + '-completer-element-container-div').adopt(
 				new Element('ul' + 
-						'[id="' + this.prefix + '-completer-element-container-ul"]' + 
+						'[id="' + this.elId + '-completer-element-container-ul"]' + 
 						'[class="' + this.prefix + '-completer-element-container-ul"]')
 		);
 
@@ -277,9 +329,9 @@ var mooCompleter = new Class({
 			var borderStyle = 'border: 1px solid #999;';
 		}
 		
-		document.id(this.prefix + '-completer-element-container-ul').adopt(
+		document.id(this.elId + '-completer-element-container-ul').adopt(
 				new Element('li' +
-						'[id="' + this.prefix + '-completer-element-container-li-' + obj.key + '"]' + 
+						'[id="' + this.elId + '-completer-element-container-li-' + obj.key + '"]' + 
 						'[class="' + this.prefix + '-completer-element-container-li"]' + 
 						'[style="' + borderStyle + '"]'
 				).adopt(
@@ -308,8 +360,8 @@ var mooCompleter = new Class({
 			el.removeEvents('click').addEvent('click', function(e) {
 				e.stop();
 				//try to destroy the highlight of an item in the select option area
-				if(this.options.selectOptions && document.id(this.prefix + '-options-li-' + el.getProperty('refkey')))
-					this.setSelectedItemBgColor(document.id(this.prefix + '-options-li-' + el.getProperty('refkey')));
+				if(this.options.selectOptions && document.id(this.elId + '-options-li-' + el.getProperty('refkey')))
+					this.setSelectedItemBgColor(document.id(this.elId + '-options-li-' + el.getProperty('refkey')));
 				//register an item
 				this.registerItem(document.id('mc-content-options-li-' + el.getProperty('refkey')));
 			}.bind(this));
@@ -317,8 +369,8 @@ var mooCompleter = new Class({
 	},
 	
 	destroyItem: function(key) {
-		if(document.id(this.prefix + '-completer-element-container-li-' + key)) {
-			document.id(this.prefix + '-completer-element-container-li-' + key).empty().destroy();
+		if(document.id(this.elId + '-completer-element-container-li-' + key)) {
+			document.id(this.elId + '-completer-element-container-li-' + key).empty().destroy();
 			this.setHeightForSelectOptionArea();
 			this.btnAdd();
 		}
@@ -327,11 +379,11 @@ var mooCompleter = new Class({
 	setHeightForSelectOptionArea: function() {
 		if(this.options.selectOptions) {
 			var getHeight = this.options.fxHeight - 
-			(document.id(this.prefix + '-btn-add').getStyle('height').toInt() +
-			document.id(this.prefix + '-label-div').getStyle('height').toInt() +
-			document.id(this.prefix + '-completer-div').getStyle('height').toInt() + 70);
+			(document.id(this.elId + '-btn-add').getStyle('height').toInt() +
+			document.id(this.elId + '-label-div').getStyle('height').toInt() +
+			document.id(this.elId + '-completer-div').getStyle('height').toInt() + 70);
 
-			document.id(this.prefix + '-options-div').setStyle('height', getHeight);
+			document.id(this.elId + '-options-div').setStyle('height', getHeight);
 		}
 	}
 });

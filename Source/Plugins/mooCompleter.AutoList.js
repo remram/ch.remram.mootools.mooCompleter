@@ -1,4 +1,8 @@
 (function(){
+	/**
+	 * Many thanks to David Walsh for this smart workaround
+	 * http://davidwalsh.name/mootools-focus
+	 */
 	Element.implement({
 		setFocus: function(index) {
 			this.setAttribute('tabIndex',index || 0);
@@ -8,18 +12,8 @@
 })();
 
 var mooCompleterAutoList = new Class({
-	Implements: Options,
-	options: {
-		selectOptions: false,
-		data: [],
-		unique: true,
-		prefix: 'mc-content'
-	},
 
-	initialize: function(el,options){
-		this.setOptions(options);
-		this.element        = document.id(el); if (!this.element) return;
-		this.prefix         = this.options.prefix;
+	initialize: function(){
 		this.inputElement   = {};
 		this.inputOverText  = {};
 		this.clonedData     = [];
@@ -33,31 +27,32 @@ var mooCompleterAutoList = new Class({
 	},
 	
 	constructCompleterArea: function() {
-		if(!document.id(this.prefix + '-completer-input-div')) return null;
+		if(!document.id(this.elId + '-completer-input-div')) return null;
 		
-		this.completerDiv = document.id(this.prefix + '-completer-input-div');
+		this.completerDiv = document.id(this.elId + '-completer-input-div');
 		
 		if(this.isElementEmpty(this.completerDiv,'html')) {
+			this.inputElement = new Element('input' + 
+					'[id="' + this.elId + '-autocompleter-input"]' + 
+					'[type="text"]' + 
+					'[title="' + this.options.autoCompleterTextOver + '"]' + 
+					'[class="' + this.prefix + '-autocompleter-input"]'
+			);
+			
 			this.completerDiv.empty().addClass('rounded-corner-5').adopt(
-					new Element('input' + 
-							'[id="' + this.prefix + '-autocompleter-input"]' + 
-							'[type="text"]' + 
-							'[title="' + this.options.autoCompleterTextOver + '"]' + 
-							'[class="' + this.prefix + '-autocompleter-input"]'
-					)
+					this.inputElement
 			);
 		}
 		this.listCnt = 0;
 		//show text over the input field if it is empty!
-		this.inputOverText = new OverText(this.prefix + '-autocompleter-input');
+		this.inputOverText = new OverText(this.elId + '-autocompleter-input');
 		//add completer event to input field
 		this.addCompleterEvent();
 	},
 	
-	addCompleterEvent: function() {
-		this.inputElement = document.id(this.prefix + '-autocompleter-input');
-		
-		this.createAutoListArea();
+	addCompleterEvent: function() {	
+		if(typeOf(this.inputElement).test('element') && !this.isElementEmpty(this.inputElement, 'html')) return;
+		//this.createAutoListArea();
 		var ulList = {};
 		
 		this.inputElement.removeEvents().addEvents({
@@ -74,6 +69,7 @@ var mooCompleterAutoList = new Class({
 			
 			'click': function(e) {
 				e.stop();
+				this.createAutoListArea();
 				this.filterValue = this.inputElement.getProperty('value');					
 				this.createFilteredArray();
 				this.inputOverText.hide();
@@ -88,20 +84,28 @@ var mooCompleterAutoList = new Class({
 		if(boolean) {
 			this.inputElement.removeEvents('blur').addEvent('blur', function(e) {
 				e.stop();
-				this.inputOverText.show();
-				this.divAutoList.fade('out');
+				this.destroyAutoList();
 			}.bind(this));
 		} else {
 			this.inputElement.removeEvents('blur');
 		}
 	},
 	
+	destroyAutoList: function() {
+		if(typeOf(this.inputOverText).test('element')) this.inputOverText.show();
+		if(typeOf(this.divAutoList).test('element')) this.divAutoList.fade('out');
+	},
+	
 	heighlightAutoCompleterElement: function(event){
 		var arrayList  = this.ulCompleter.getChildren();
+		var listLength = arrayList.length;
 		var hasElement = false;
 		//if element exists! remove highlighting class
-		if(typeOf(this.selectedElement) == 'element' ) {
+		if(typeOf(this.selectedElement).test('element') && !this.isElementEmpty(this.selectedElement, 'html')) {
 			this.selectedElement.removeClass(this.prefix + '-auto-completer-li-highlight');
+		}
+		
+		if(listLength >= 1) {
 			hasElement = true;
 		}
 		
@@ -110,8 +114,9 @@ var mooCompleterAutoList = new Class({
 				//remove blur event on input field
 				this.switchBlurEventOnAutoCompleterField(false);
 				if(hasElement) {					
-					if(this.listCnt <= 0) this.listCnt = arrayList.length - 1;
+					if(this.listCnt <= 1) this.listCnt = listLength;
 					else --this.listCnt;
+					
 					this.highlightElement(arrayList);
 				}
 			break;
@@ -119,64 +124,47 @@ var mooCompleterAutoList = new Class({
 				//remove blur event on input field
 				this.switchBlurEventOnAutoCompleterField(false);
 				if(hasElement) {
-					if(this.listCnt >= arrayList.length - 1) this.listCnt = 0;
-					else ++this.listCnt;
+					if(this.listCnt < listLength) ++this.listCnt;
+					else this.listCnt = 1;
+					
 					this.highlightElement(arrayList);
 				}
 			break;
 			case 'enter':
-				if(hasElement) {
-					console.info('1. hasElement? ', hasElement);
-					//add blur event on input field
-					this.switchBlurEventOnAutoCompleterField(true);
-					document.id(this.prefix + '-label-input').focus();
-					document.id(this.prefix + '-label-input').setFocus();
-					this.divAutoList.fade('out');
-					
+				//add blur event on input field
+				this.switchBlurEventOnAutoCompleterField(true);
+				document.id(this.elId + '-label-input').focus();
+				document.id(this.elId + '-label-input').setFocus();
+				this.divAutoList.fade('out');
+				
+				if(!this.isElementEmpty(this.selectedElement, 'html')) {
 					this.registerItem(this.selectedElement);
 					if(this.options.selectOptions)
-						this.setSelectedItemBgColor(document.id(this.prefix + '-options-li-' + this.selectedElement.getProperty('refkey')));
+						this.setSelectedItemBgColor(document.id(this.elId + '-options-li-' + this.selectedElement.getProperty('refkey')));
 					
 					this.btnAdd();
 					this.selectedElement.empty().destroy();
-					
-					
-					
-				} else {
-					console.info('2. hasElement? ', hasElement);
-					this.listCnt = -1;
 				}
 				
 				//reset input field
-				this.inputElement.set('value', '');
-				//arrayList = this.ulCompleter.getChildren();
-				
-				/*if(!this.isElementEmpty(this.inputElement, 'value') && 
-						!this.isElementEmpty(this.selectedElement, 'html')) {
-					this.registerItem(this.selectedElement);
-					if(this.options.selectOptions)
-						this.setSelectedItemBgColor(document.id(this.prefix + '-options-li-' + this.selectedElement.getProperty('refkey')));
-					
-					this.btnAdd();
-					this.selectedElement.empty().destroy();
-				}*/
-				
-				
-				//hasElement = false;
-				
+				this.inputElement.set('value', '');				
 			break;
 		}
-		
 		
 		this.inputElement.setFocus();
 	},
 	
 	highlightElement: function(arrayList) {
-		if(this.listCnt >= 0 && arrayList[this.listCnt]) {
-			console.warn('enter IF:');
-			this.selectedElement = document.id(arrayList[this.listCnt].get('id'));		
+		if(this.listCnt >= 0 && arrayList[this.listCnt-1]) {
+			//construct highlighted counter id
+			var cnt = 0;
+			if(this.listCnt > 0) cnt = this.listCnt - 1;
+			
+			//set selected element
+			this.selectedElement = document.id(arrayList[cnt].get('id'));	
+			
 			if(typeOf(this.selectedElement) == 'element') {
-				this.selectedElement.setFocus(this.selectedElement.getAttribute('tabIndex'));
+				this.selectedElement.setFocus(this.selectedElement.getProperty('tabIndex'));
 				this.selectedElement.addClass(this.prefix + '-auto-completer-li-highlight');
 			}
 		}
@@ -193,7 +181,7 @@ var mooCompleterAutoList = new Class({
 		this.clonedData = Array.clone(tempArray);
 	},
 	
-	createFilteredArray: function() {		
+	createFilteredArray: function() {
 		if(this.options.unique) {
 			this.destroyDuplicateEntries();
 		} else {
@@ -229,27 +217,30 @@ var mooCompleterAutoList = new Class({
 	},
 	
 	createAutoListArea: function() {
+		//destroy previous element if exists!
+		if(typeOf(this.divAutoList).test('element') && !this.isElementEmpty(this.divAutoList, 'html')){
+			this.divAutoList.empty().destroy();
+		}
+		
 		this.divAutoList = new Element('div' +
-				'[id="' + this.prefix + '-auto-completer-list-area"]' + 
+				'[id="' + this.elId + '-auto-completer-list-area"]' + 
 				'[class="' + this.prefix + '-auto-completer-list-area rounded-corner-bottom"]'
 		).setStyles({
-			top        : this.inputElement.getCoordinates().bottom,
-			left       : this.inputElement.getCoordinates().left + 2,			
 			width      : this.inputElement.getCoordinates().width - 10,
 			visibility : 'hidden'
 		}).inject(this.inputElement, 'after');
 	},
 	
 	buildFilteredList: function() {
-
+		this.ulCompleter = new Element('ul[id="' + this.elId + '-auto-completer-ul"][class="' + this.prefix + '-auto-completer-ul"]');
 		this.divAutoList.adopt(
-				this.ulCompleter = new Element('ul[id="' + this.prefix + '-auto-completer-ul" class="' + this.prefix + '-auto-completer-ul"]')
+				this.ulCompleter
 		).setStyle('visibility', 'visible').fade(.9);
 		
 		Array.each(this.filteredArray, function(value, index){
 			this.ulCompleter.adopt(
 					new Element('li' + 
-							'[id="' + this.prefix + '-auto-completer-li-' + value[0] + '"]' + 
+							'[id="' + this.elId + '-auto-completer-li-' + value[0] + '"]' + 
 							'[refkey="' + value[0] + '"]' +
 							'[refvalue="' + value[1] + '"]' +
 							'[class="' + this.prefix + '-auto-completer-li"]' + 
@@ -264,12 +255,12 @@ var mooCompleterAutoList = new Class({
 	
 	addAutoCompleterEvents: function() {
 		this.inputOverText.show();
-		$$('li.' + this.prefix + '-auto-completer-li').each(function(el){
+		$$('ul#' + this.ulCompleter.get('id') + ' li.' + this.prefix + '-auto-completer-li').each(function(el){
 			el.removeEvents().addEvent('click', function(e) {
 					e.stop();					
 					this.registerItem(el);
 					if(this.options.selectOptions)
-						this.setSelectedItemBgColor(document.id(this.prefix + '-options-li-' + el.getProperty('refkey')));
+						this.setSelectedItemBgColor(document.id(this.elId + '-options-li-' + el.getProperty('refkey')));
 					//empty or reset the auto completer input field
 					this.inputElement.set('value','');
 					this.btnAdd();
@@ -280,7 +271,7 @@ var mooCompleterAutoList = new Class({
 	},
 	
 	cleanCompleterList: function() {
-		if(this.ulCompleter && !this.isElementEmpty(this.ulCompleter,'html')) {
+		if(typeOf(this.ulCompleter).test('element') && !this.isElementEmpty(this.ulCompleter,'html')) {
 			this.ulCompleter.empty().destroy();
 		}
 	}

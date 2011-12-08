@@ -74,15 +74,21 @@ html {
 }
 
 div.mc-content {
+	position: relative;
 	width: 200px;
 	height: 20px;
 	border: 1px solid #aaa;
 	background-color: #FAFAFA;
+	margin-bottom: 1em;
 	padding: .5em;
 	text-shadow: 1px 1px 0px #fff;
 }
 
-div.moo-completer_overlay {
+div.mc-content-area {
+	position: absolute;
+}
+
+div.mc-content_overlay {
 	position: absolute;
 	font-size: 1.1em;
 	font-weight: bold;
@@ -90,7 +96,7 @@ div.moo-completer_overlay {
 	background-color: #FAFAFA;
 }
 
-div.moo-completer_overlay:hover {
+div.mc-content_overlay:hover {
 	color: #0B55C4;
 	background-color: #E6E6E6;
 }
@@ -203,6 +209,8 @@ ul.mc-content-auto-completer-ul li {
 div.mc-content-btn-add {
 	float: left;
 	width: 70px;
+	height: 15px;
+	max-height: 20px;
 	font-weight: bold;
 	border: 1px solid #aaa;
 	margin-bottom: .5em;
