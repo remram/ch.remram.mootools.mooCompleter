@@ -1,7 +1,6 @@
 window.addEvent('domready', function() {
 	/**
-	 * Example 1:
-	 * 
+	 * Example 1
 	 */
 	var mc1 = new mooCompleter('moo-completer-1', {
 		selectOptions: true,
@@ -33,7 +32,10 @@ window.addEvent('domready', function() {
 			new Element('div[style="clear: both;"][html="<b>DeSelected Item:</b> ' + element.getProperty('id') + ' -> ' + item.get('text') + '"]').inject(document.id('log-area'), 'top');
 		}
 	});
-	
+
+	/**
+	 * Example 2 
+	 */
 	var mc2 = new mooCompleter('moo-completer-2', {
 		selectOptions: true,
 		fxHeight: 300,
@@ -63,6 +65,9 @@ window.addEvent('domready', function() {
 		}
 	});
 	
+	/**
+	 * Example 3 
+	 */
 	var mc3 = new mooCompleter('moo-completer-3', {
 		data: [
 		       { key: 'key0' , value: 'value0 value0 value0' },
@@ -88,6 +93,9 @@ window.addEvent('domready', function() {
 		}
 	});
 	
+	/**
+	 * Example 4 
+	 */
 	var mc4 = new mooCompleter('moo-completer-4', {
 		selectOptions         : false,
 		label                 : 'MY LABEL',
@@ -118,6 +126,12 @@ window.addEvent('domready', function() {
 		},
 		onDeSelect: function(item, element) {
 			new Element('div[style="clear: both;"][html="<b>DeSelected Item:</b> ' + element.getProperty('id') + ' -> ' + item.get('text') + '"]').inject(document.id('log-area'), 'top');
+		},
+		onOpen: function(element) {
+			new Element('div[style="clear: both;"][html="<b>Open Area:</b> ' + element.getProperty('id') + ' -> open it!"]').inject(document.id('log-area'), 'top');
+		},
+		onClose: function(element) {
+			new Element('div[style="clear: both;"][html="<b>Close Area:</b> ' + element.getProperty('id') + ' -> close it!"]').inject(document.id('log-area'), 'top');
 		}
 	});
 });

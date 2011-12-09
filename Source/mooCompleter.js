@@ -35,10 +35,10 @@ var mooCompleter = new Class({
 		this.morphFx                    = {};
 		this.status                     = false;
 		this.overlayElement             = {};
+		this.switchingCnt               = 0;
 		
 		if(this.options.label.test(/\w+/)) this.options.buttonLabel = this.options.label;
 		this.overlayLabel               = this.options.buttonLabel;
-		this.labelFieldTextOver         = this.options.label;
 		
 		this.cleanLabelInput();
 		this.constructInputArea();
@@ -106,7 +106,7 @@ var mooCompleter = new Class({
 										'[type="text"]' + 
 										'[title="' + this.options.labelFieldTextOver + '"]' + 
 										'[maxlength="' + this.options.labelTextMaxLength + '"]' +
-										'[value="' + this.labelFieldTextOver + '"]')
+										'[value="' + this.options.label + '"]')
 						),
 						new Element('div' +
 								'[id="' + this.elId + '-completer-div"]' +
@@ -188,6 +188,8 @@ var mooCompleter = new Class({
 				document.id(this.elId + '-area').fade('in');
 				this.element.setStyle('cursor','default').addClass('shadow');				
 				this.setLabel();
+				//fire open event
+				this.fireEvent('open', this.element);
 			}.bind(this));
 		}.bind(this));
 	},
@@ -203,6 +205,8 @@ var mooCompleter = new Class({
 			this.element.setStyle('cursor','pointer').removeClass('shadow');
 			this.setLabel();
 			this.showContentArea();
+			//fire close event
+			this.fireEvent('close', this.element);
 		}.bind(this));
 	},
 	
@@ -233,7 +237,7 @@ var mooCompleter = new Class({
 	
 	isElementEmpty: function(el, property) {
 		if(typeOf(el).test('element')){
-			//workaround for ugly and unprofessional browser like ie8 and less! 
+			//workaround for ugly and unprofessional browser like ie8 and lower! 
 			if(Browser.ie && Browser.version < 9) {
 				if(property == 'html'){
 					if(el.innerHTML) return false;
@@ -366,7 +370,7 @@ var mooCompleter = new Class({
 				e.stop();
 				var element = new Element('li' +
 						'[id="' + this.elId + '-options-li-' + el.getProperty('refkey') +'"]' +
-						'[style="visible: none;"]' +
+						'[style="display: none;"]' +
 						'[text="' + el.getProperty('refvalue') + '"]' +
 						'[refkey="' + el.getProperty('refkey') + '"]'
 				);

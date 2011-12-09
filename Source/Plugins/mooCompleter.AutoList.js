@@ -5,6 +5,7 @@
 	 */
 	Element.implement({
 		setFocus: function(index) {
+			if(!this || !typeOf(this).test('element')) return;
 			this.setAttribute('tabIndex',index || 0);
 			this.focus();
 		}
@@ -45,7 +46,7 @@ var mooCompleterAutoList = new Class({
 		}
 		this.listCnt = 0;
 		//show text over the input field if it is empty!
-		this.inputOverText = new OverText(this.elId + '-autocompleter-input');
+		this.inputOverText = new OverText(this.inputElement);
 		//add completer event to input field
 		this.addCompleterEvent();
 	},
@@ -69,6 +70,8 @@ var mooCompleterAutoList = new Class({
 			
 			'click': function(e) {
 				e.stop();
+				//add blur event on input field
+				this.switchBlurEventOnAutoCompleterField(true);
 				this.createAutoListArea();
 				this.filterValue = this.inputElement.getProperty('value');					
 				this.createFilteredArray();
@@ -76,8 +79,6 @@ var mooCompleterAutoList = new Class({
 				ulList = this.ulCompleter.getChildren();
 			}.bind(this)			
 		});
-		//add blur event on input field
-		this.switchBlurEventOnAutoCompleterField(true);
 	},
 	
 	switchBlurEventOnAutoCompleterField: function(boolean) {
@@ -91,12 +92,13 @@ var mooCompleterAutoList = new Class({
 		}
 	},
 	
-	destroyAutoList: function() {
-		this.inputOverText.show();
+	destroyAutoList: function() {		
+		if(typeOf(this.inputOverText).test('object')) this.inputOverText.show();
 		if(typeOf(this.divAutoList).test('element')) this.divAutoList.fade('out');
 	},
 	
 	heighlightAutoCompleterElement: function(event){
+		if(!typeOf(this.ulCompleter).test('element') || this.isElementEmpty(this.ulCompleter, 'html')) return;
 		var arrayList  = this.ulCompleter.getChildren();
 		var listLength = arrayList.length;
 		var hasElement = false;
@@ -108,7 +110,7 @@ var mooCompleterAutoList = new Class({
 		if(listLength >= 1) {
 			hasElement = true;
 		}
-		
+				
 		switch(event.key) {
 			case 'up':
 				//remove blur event on input field
@@ -161,9 +163,13 @@ var mooCompleterAutoList = new Class({
 			if(this.listCnt > 0) cnt = this.listCnt - 1;
 			
 			//set selected element
-			this.selectedElement = document.id(arrayList[cnt].get('id'));	
+			this.selectedElement = document.id(arrayList[cnt].get('id'));
 			
 			if(typeOf(this.selectedElement) == 'element') {
+				//workaround for ugly and unprofessional browser like ie8 and lower! 
+				if(Browser.ie && Browser.version < 9) {
+					this.selectedElement.focus();
+				}
 				this.selectedElement.setFocus(this.selectedElement.getProperty('tabIndex'));
 				this.selectedElement.addClass(this.prefix + '-auto-completer-li-highlight');
 			}
@@ -235,7 +241,9 @@ var mooCompleterAutoList = new Class({
 		this.ulCompleter = new Element('ul[id="' + this.elId + '-auto-completer-ul"][class="' + this.prefix + '-auto-completer-ul"]');
 		this.divAutoList.adopt(
 				this.ulCompleter
-		).setStyle('visibility', 'visible').fade(.9);
+		);
+		
+		if(typeOf(this.divAutoList).test('element') && !this.isElementEmpty(this.divAutoList, 'html')) this.divAutoList.setStyle('visibility', 'visible').fade(.9);
 		
 		Array.each(this.filteredArray, function(value, index){
 			this.ulCompleter.adopt(
@@ -257,13 +265,14 @@ var mooCompleterAutoList = new Class({
 		this.inputOverText.show();
 		$$('ul#' + this.ulCompleter.get('id') + ' li.' + this.prefix + '-auto-completer-li').each(function(el){
 			el.removeEvents().addEvent('click', function(e) {
-					e.stop();					
+					e.stop();
 					this.registerItem(el);
 					if(this.options.selectOptions)
 						this.setSelectedItemBgColor(document.id(this.elId + '-options-li-' + el.getProperty('refkey')));
 					//empty or reset the auto completer input field
 					this.inputElement.set('value','');
 					this.btnAdd();
+					this.destroyAutoList();
 					//add blur event on input field
 					this.switchBlurEventOnAutoCompleterField(true);
 			}.bind(this));
