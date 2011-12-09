@@ -6,7 +6,7 @@ var mooCompleter = new Class({
 		selectOptions         : true,
 		data                  : [],
 		selectedItems         : [],
-		overlayLabel          : 'Add new item',
+		buttonLabel           : 'Add new item',
 		label                 : '',
 		labelFieldTextOver    : 'Label!',
 		labelTextMaxLength    : 20,
@@ -14,7 +14,11 @@ var mooCompleter = new Class({
 		unique                : true,
 		fxHeight              : 300,
 		fxWidth               : 600,
-		prefix                : 'mc-content'
+		prefix                : 'mc-content',
+		errors                : {
+			duplicateElement  : 'Warning: Declaration for element [{element_id}] was wrong!\n It could have been added a few times!',
+			dataArray         : 'Error: You put incorrect format for the data array!'
+		}
 	},
 
 	initialize: function(el,options){
@@ -31,7 +35,10 @@ var mooCompleter = new Class({
 		this.morphFx                    = {};
 		this.status                     = false;
 		this.overlayElement             = {};
-		this.overlayLabel               = this.options.label || this.options.overlayLabel;
+		
+		if(this.options.label.test(/\w+/)) this.options.buttonLabel = this.options.label;
+		this.overlayLabel               = this.options.buttonLabel;
+		this.labelFieldTextOver         = this.options.label;
 		
 		this.cleanLabelInput();
 		this.constructInputArea();
@@ -39,13 +46,14 @@ var mooCompleter = new Class({
 	
 	checkMainElement: function(element) {
 		if(!this.isElementEmpty(element, 'html')) {
-			alert('Warning: Declaration for element [' + element.getProperty('id') + '] was wrong!\n It could have been added a few times!');
+			alert( this.options.errors.duplicateElement.substitute({element_id: element.getProperty('id')}) );
 			return false;
 		}
 		return true;
 	},
 	
 	cleanLabelInput: function() {
+		if(!typeOf(this.overlayLabel).test('element') || !this.overlayLabel.test(/\w+/)) return;
 		this.overlayLabel = this.overlayLabel.clean().stripTags().stripScripts();
 		if(this.overlayLabel.length >= this.options.labelTextMaxLength) {
 			this.overlayLabel = this.overlayLabel.substr(0,(this.options.labelTextMaxLength-3)) + '...';
@@ -62,13 +70,9 @@ var mooCompleter = new Class({
 		return boolean;
 	},
 	
-	getWidthAsPercentage: function(percent) {
-		return this.options.fxWidth * (percent * 0.01);
-	},
-	
 	constructInputArea: function() {
 		if(!this.checkDataArray()) {
-			this.element.set('text', 'Error: You put incorrect format for the data array!');
+			this.element.set('text', this.options.errors.dataArray);
 			return null;
 		}
 		//set some styles
@@ -79,7 +83,7 @@ var mooCompleter = new Class({
 		this.switchOverlay();
 		
 		this.element.adopt(
-				new Element('div[id="' + this.elId + '-area"][class="' + this.prefix + '-area"][style="visibility: hidden; width: ' + this.getWidthAsPercentage(100) + 'px"]').adopt(
+				new Element('div[id="' + this.elId + '-area"][class="' + this.prefix + '-area"][style="visibility: hidden; width: ' + this.options.fxWidth + 'px"]').adopt(
 						new Element('div' + 
 								'[id="' + this.elId + '-btn-add"]' +
 								'[class="' + this.prefix + '-btn-add rounded-corner-bottom shadow-border clearfix"]' +
@@ -102,7 +106,7 @@ var mooCompleter = new Class({
 										'[type="text"]' + 
 										'[title="' + this.options.labelFieldTextOver + '"]' + 
 										'[maxlength="' + this.options.labelTextMaxLength + '"]' +
-										'[value="' + this.options.label + '"]')
+										'[value="' + this.labelFieldTextOver + '"]')
 						),
 						new Element('div' +
 								'[id="' + this.elId + '-completer-div"]' +
@@ -337,9 +341,10 @@ var mooCompleter = new Class({
 				).adopt(
 						new Element('div[class="rounded-corner-5 shadow"]').adopt(
 								new Element('div' +
-										'[refkey=' + obj.key + ']' +
 										'[class="' + this.prefix + '-btn-close"]' + 
-										'[text="x"]'
+										'[text="x"]' +
+										'[refkey="' + obj.key + '"]' +
+										'[refvalue="' + obj.value + '"]'
 								),
 								new Element('div' +
 										'[class="' + this.prefix + '-selected-element-value"]' + 
@@ -356,14 +361,24 @@ var mooCompleter = new Class({
 	},
 	
 	initDestroyItemEvent: function() {
-		$$('div.' + this.prefix + '-btn-close').each(function(el) {
+		$$('ul#' + this.elId + '-completer-element-container-ul  div.' + this.prefix + '-btn-close').each(function(el) {
 			el.removeEvents('click').addEvent('click', function(e) {
 				e.stop();
+				var element = new Element('li' +
+						'[id="' + this.elId + '-options-li-' + el.getProperty('refkey') +'"]' +
+						'[style="visible: none;"]' +
+						'[text="' + el.getProperty('refvalue') + '"]' +
+						'[refkey="' + el.getProperty('refkey') + '"]'
+				);
+				
 				//try to destroy the highlight of an item in the select option area
-				if(this.options.selectOptions && document.id(this.elId + '-options-li-' + el.getProperty('refkey')))
+				if(this.options.selectOptions && document.id(this.elId + '-options-li-' + el.getProperty('refkey'))) {
 					this.setSelectedItemBgColor(document.id(this.elId + '-options-li-' + el.getProperty('refkey')));
+					element = document.id(this.elId + '-options-li-' + el.getProperty('refkey'));
+				}
+					
 				//register an item
-				this.registerItem(document.id('mc-content-options-li-' + el.getProperty('refkey')));
+				this.registerItem(element);
 			}.bind(this));
 		}.bind(this));
 	},

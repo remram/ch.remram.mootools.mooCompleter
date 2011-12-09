@@ -92,7 +92,7 @@ var mooCompleterAutoList = new Class({
 	},
 	
 	destroyAutoList: function() {
-		if(typeOf(this.inputOverText).test('element')) this.inputOverText.show();
+		this.inputOverText.show();
 		if(typeOf(this.divAutoList).test('element')) this.divAutoList.fade('out');
 	},
 	
