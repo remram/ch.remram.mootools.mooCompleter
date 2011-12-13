@@ -3,6 +3,8 @@ mooCompleter
 
 This class integrates both AutoCompleter function and select option list. The selected elements are grouped. Take a look and have fun.
 
+![Screenshot](http://www.baghdad.ch/images/mootools/moocompleter/mc00.png)
+
 Options
 -------
 
@@ -42,7 +44,7 @@ Demo
 
 Screenshots
 -----------
-![Screenshot](http://www.baghdad.ch/images/mootools/moocompleter/mc00.png)
+
 ![Screenshot 1](http://www.baghdad.ch/images/mootools/moocompleter/mc01.png)
 ![Screenshot 2](http://www.baghdad.ch/images/mootools/moocompleter/mc02.png)
 ![Screenshot 3](http://www.baghdad.ch/images/mootools/moocompleter/mc03.png)
