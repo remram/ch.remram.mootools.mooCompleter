@@ -47,7 +47,7 @@ How to use
 
 4. Run the plugin
 
-	window.addEvent('domready', function() {
+	`window.addEvent('domready', function() {
 		/**
 		 * Example 1
 		 */
@@ -183,4 +183,4 @@ How to use
 				new Element('div[style="clear: both;"][html="<b>Close Area:</b> ' + element.getProperty('id') + ' -> close it!"]').inject(document.id('log-area'), 'top');
 			}
 		});
-	});
+	});`
