@@ -21,21 +21,18 @@ Screenshots
 How to use
 ----------
 
-1. Import the plugin
+#1. Import the plugin
 
-	#HTML
     <script type="text/javascript" src="{yourSourcePath}/Plugins/mooCompleter.AutoList.js"></script>
     <script type="text/javascript" src="{yourSourcePath}/Plugins/mooCompleter.SelectOptions.js"></script>
     <script type="text/javascript" src="{yourSourcePath}/mooCompleter.js"></script>
     
-2. Import css file
+#2. Import css file
 
-	#HTML
 	<link rel="stylesheet" type="text/css" href="{yourSourcePath}/mooCompleter.css" />
     
-3. Insert empty `div` in the html
+#3. Insert empty `div` in the html
 
-	#HTML
 	<!-- 1. example -->
     <div id="moo-completer-1" class="mc-content"></div>
     <!-- 2. example -->
@@ -48,9 +45,8 @@ How to use
 	<div id="log-area"></div>
     
 
-4. Run the plugin
+#4. Run the plugin
 
-	#JS
 	window.addEvent('domready', function() {
 		
 		//Example 1
