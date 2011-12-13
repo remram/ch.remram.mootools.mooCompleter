@@ -3,6 +3,36 @@ mooCompleter
 
 This class integrates both AutoCompleter function and select option list. The selected elements are grouped. Take a look and have fun.
 
+Options
+-------
+
+	options: {
+		selectOptions         : true,
+		data                  : [],
+		selectedItems         : [],
+		buttonLabel           : 'Add new item',
+		label                 : '',
+		labelFieldTextOver    : 'Label!',
+		labelTextMaxLength    : 20,
+		autoCompleterTextOver : 'Search here for an item',
+		unique                : true,
+		fxHeight              : 300,
+		fxWidth               : 600,
+		prefix                : 'mc-content',
+		errors                : {
+			duplicateElement  : 'Warning: Declaration for element [{element_id}] was wrong!\n It could have been added a few times!',
+			dataArray         : 'Error: You put incorrect format for the data array!'
+		}
+	}
+	
+Events
+------
+
+- onOpen
+- onClose
+- onSelect
+- onDeSelect
+- onComplete
 
 Demo
 ----
