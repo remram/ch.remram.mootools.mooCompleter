@@ -5,6 +5,7 @@ This class integrates both AutoCompleter function and select option list. The se
 
 ![Screenshot](http://www.baghdad.ch/images/mootools/moocompleter/mc00.png)
 
+
 Options
 -------
 
