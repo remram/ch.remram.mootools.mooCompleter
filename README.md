@@ -51,17 +51,17 @@ Screenshots
 How to Use
 ----------
 
-1. Import the plugin
+Import the plugin
 
     <script type="text/javascript" src="{yourSourcePath}/Plugins/mooCompleter.AutoList.js"></script>
     <script type="text/javascript" src="{yourSourcePath}/Plugins/mooCompleter.SelectOptions.js"></script>
     <script type="text/javascript" src="{yourSourcePath}/mooCompleter.js"></script>
     
-2. Import css file
+Import css file
 
 	<link rel="stylesheet" type="text/css" href="{yourSourcePath}/mooCompleter.css" />
     
-3. Insert empty `div` in the html
+Insert empty `div` in the html
 
 	<!-- 1. example -->
     <div id="moo-completer-1" class="mc-content"></div>
@@ -75,7 +75,7 @@ How to Use
 	<div id="log-area"></div>
     
 
-4. Run the plugin
+Run the plugin
 
 	window.addEvent('domready', function() {
 		
