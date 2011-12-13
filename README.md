@@ -23,16 +23,19 @@ How to use
 
 1. Import the plugin
 
+	#HTML
     <script type="text/javascript" src="{yourSourcePath}/Plugins/mooCompleter.AutoList.js"></script>
     <script type="text/javascript" src="{yourSourcePath}/Plugins/mooCompleter.SelectOptions.js"></script>
     <script type="text/javascript" src="{yourSourcePath}/mooCompleter.js"></script>
     
 2. Import css file
 
+	#HTML
 	<link rel="stylesheet" type="text/css" href="{yourSourcePath}/mooCompleter.css" />
     
 3. Insert empty `div` in the html
 
+	#HTML
 	<!-- 1. example -->
     <div id="moo-completer-1" class="mc-content"></div>
     <!-- 2. example -->
@@ -47,10 +50,10 @@ How to use
 
 4. Run the plugin
 
+	#JS
 	window.addEvent('domready', function() {
-		/**
-		 * Example 1
-		 */
+		
+		//Example 1
 		var mc1 = new mooCompleter('moo-completer-1', {
 			selectOptions: true,
 			unique: true,
@@ -82,9 +85,7 @@ How to use
 			}
 		});
 	
-		/**
-		 * Example 2 
-		 */
+		//Example 2 
 		var mc2 = new mooCompleter('moo-completer-2', {
 			selectOptions: true,
 			fxHeight: 300,
@@ -114,9 +115,7 @@ How to use
 			}
 		});
 		
-		/**
-		 * Example 3 
-		 */
+		//Example 3 
 		var mc3 = new mooCompleter('moo-completer-3', {
 			data: [
 			       { key: 'key0' , value: 'value0 value0 value0' },
@@ -142,9 +141,7 @@ How to use
 			}
 		});
 		
-		/**
-		 * Example 4 
-		 */
+		//Example 4 
 		var mc4 = new mooCompleter('moo-completer-4', {
 			selectOptions         : false,
 			label                 : 'MY LABEL',
