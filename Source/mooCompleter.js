@@ -1,3 +1,20 @@
+/*
+---
+description: mooCompleter, groups your selected items!
+
+license: MIT-style
+
+authors:
+- Ramy Hasan (http://www.solexperts.com)
+
+requires:
+- core/1.4: '*'
+- more/1.4: 'Object'
+
+provides: [mooCompleter, auto complete, select option]
+
+...
+*/
 
 var mooCompleter = new Class({
 	Implements: [Options, Events, mooCompleterAutoList, mooCompleterSelectOptions],
@@ -35,7 +52,6 @@ var mooCompleter = new Class({
 		this.morphFx                    = {};
 		this.status                     = false;
 		this.overlayElement             = {};
-		this.switchingCnt               = 0;
 		
 		if(this.options.label.test(/\w+/)) this.options.buttonLabel = this.options.label;
 		this.overlayLabel               = this.options.buttonLabel;

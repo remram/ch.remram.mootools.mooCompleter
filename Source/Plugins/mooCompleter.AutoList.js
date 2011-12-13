@@ -1,3 +1,20 @@
+/*
+---
+description: AutoList, creates an auto completer.
+
+license: MIT-style
+
+authors:
+- Ramy Hasan (http://www.solexperts.com)
+
+requires:
+- mooCompleter/1.0: '*'
+
+provides: [mooCompleterAutoList]
+
+...
+*/
+
 (function(){
 	/**
 	 * Many thanks to David Walsh for this smart workaround

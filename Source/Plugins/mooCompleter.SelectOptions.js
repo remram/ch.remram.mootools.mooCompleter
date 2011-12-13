@@ -1,3 +1,19 @@
+/*
+---
+description: SelectOptions, creates a list like an select options.
+
+license: MIT-style
+
+authors:
+- Ramy Hasan (http://www.solexperts.com)
+
+requires:
+- mooCompleter/1.0: '*'
+
+provides: [mooCompleterSelectOptions]
+
+...
+*/
 
 var mooCompleterSelectOptions = new Class({
 	initialize: function(){
