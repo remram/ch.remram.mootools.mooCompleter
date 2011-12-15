@@ -261,19 +261,23 @@ var mooCompleterAutoList = new Class({
 		);
 		
 		if(typeOf(this.divAutoList).test('element') && !this.isElementEmpty(this.divAutoList, 'html')) this.divAutoList.setStyle('visibility', 'visible').fade(.9);
+		var maxIterate    = this.options.maxItemsPerPage;
+		var filterdLength = this.filteredArray.length;
+		if(maxIterate > filterdLength) maxIterate = filterdLength;
 		
-		Array.each(this.filteredArray, function(value, index){
+		for(var i = 0 ; i < maxIterate ; i++) {
+			var value = this.filteredArray[i];
 			this.ulCompleter.adopt(
 					new Element('li' + 
 							'[id="' + this.elId + '-auto-completer-li-' + value[0] + '"]' + 
 							'[refkey="' + value[0] + '"]' +
 							'[refvalue="' + value[1] + '"]' +
 							'[class="' + this.prefix + '-auto-completer-li"]' + 
-							'[tabindex="' + index + '"]'
+							'[tabindex="' + i + '"]'
 							).adopt( new Element('span[html="' + value[2] + '"]')
 					)
 			);
-		}.bind(this));
+		}
 		
 		this.addAutoCompleterEvents();
 	},

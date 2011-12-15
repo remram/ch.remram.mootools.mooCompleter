@@ -108,6 +108,35 @@ div.mc-content ul {
 }
 
 /**
+* Pagenation
+*/
+div.mc-content-pagenation {
+	height: 20px;
+	font-size: .8em;
+	background-color: transparent;
+	text-align: center !important;
+	margin: 0 auto;
+	margin-top: .5em;
+	
+}
+
+div.mc-content-pagenation-navigation {	
+	width: 160px;
+	margin:0 auto;
+}
+
+div.mc-content-pagenation-navigation div {
+	float: left;
+	width: 70px;
+	margin-left: 8px;
+	background-color: #eee;
+}
+
+div.mc-content-pagenation-navigation div:hover {
+	color: #0B55C4;
+}
+
+/**
  * Auto-Completer styles
  */
 div.mc-content-completer-div {

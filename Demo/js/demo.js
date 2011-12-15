@@ -7,6 +7,7 @@ window.addEvent('domready', function() {
 		unique: true,
 		fxHeight: 400,
 		fxWidth: 900,
+		maxItemsPerPage: 3,
 		buttonLabel: 'Test',
 		data: [
 		       { key: 'key0' , value: 'value0 value0 value0' },
@@ -40,6 +41,7 @@ window.addEvent('domready', function() {
 		selectOptions: true,
 		fxHeight: 300,
 		fxWidth: 250,
+		maxItemsPerPage: 5,
 		buttonLabel: 'Group',
 		data: [
 		       { key: 'key0' , value: 'value0 value0 value0' },

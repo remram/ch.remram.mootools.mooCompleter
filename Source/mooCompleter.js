@@ -31,6 +31,7 @@ var mooCompleter = new Class({
 		unique                : true,
 		fxHeight              : 300,
 		fxWidth               : 600,
+		maxItemsPerPage       : 10,
 		prefix                : 'mc-content',
 		errors                : {
 			duplicateElement  : 'Warning: Declaration for element [{element_id}] was wrong!\n It could have been added a few times!',
@@ -138,7 +139,7 @@ var mooCompleter = new Class({
 								)
 						)
 				)
-		);
+		).makeDraggable({container: this.element.getParent('body')});
 		
 		//create select option area if [selectOptions = true]
 		this.constructSelectOption();
