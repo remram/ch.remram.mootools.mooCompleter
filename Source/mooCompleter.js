@@ -10,6 +10,7 @@ authors:
 requires:
 - core/1.4: '*'
 - more/1.4: 'Object'
+- more/1.4: 'Drag.Move'
 
 provides: [mooCompleter, auto complete, select option]
 
@@ -32,6 +33,8 @@ var mooCompleter = new Class({
 		fxHeight              : 300,
 		fxWidth               : 600,
 		maxItemsPerPage       : 10,
+		zIndexOn              : 65000,
+		zIndexOff             : -1,
 		prefix                : 'mc-content',
 		errors                : {
 			duplicateElement  : 'Warning: Declaration for element [{element_id}] was wrong!\n It could have been added a few times!',
@@ -57,7 +60,9 @@ var mooCompleter = new Class({
 		if(this.options.label.test(/\w+/)) this.options.buttonLabel = this.options.label;
 		this.overlayLabel               = this.options.buttonLabel;
 		
+		
 		this.cleanLabelInput();
+		this.replaceElement();
 		this.constructInputArea();
 	},
 	
@@ -87,15 +92,36 @@ var mooCompleter = new Class({
 		return boolean;
 	},
 	
+	replaceElement: function(){
+		if(!this.checkDataArray()) {
+			this.element.set('text', this.options.errors.dataArray);
+			return null;
+		}
+		
+		var tempElement = this.cloneElement(this.element, 'after', '_clone').adopt(
+				new Element('div[' + this.elId + '-header][class="' + this.prefix + '-area"]')
+		);
+		
+		this.element.destroy();
+		this.element = tempElement.clone()
+								  .inject(document.body, 'after')
+								  .setProperty('id', tempElement.getProperty('id').split('_')[0])
+								  .addClass(this.prefix);
+		tempElement.destroy();
+	},
+	
 	constructInputArea: function() {
 		if(!this.checkDataArray()) {
 			this.element.set('text', this.options.errors.dataArray);
 			return null;
 		}
+		
 		//set some styles
 		this.element.setStyle('cursor','pointer').addClass('rounded-corner-bottom');
+		
 		//clone the element
 		this.overlayElement = this.cloneElement(this.element, 'after', '_overlay').set('text',this.overlayLabel).addClass('shadow');
+		
 		//switch overlay
 		this.switchOverlay();
 		
@@ -103,7 +129,7 @@ var mooCompleter = new Class({
 				new Element('div[id="' + this.elId + '-area"][class="' + this.prefix + '-area"][style="visibility: hidden; width: ' + this.options.fxWidth + 'px"]').adopt(
 						new Element('div' + 
 								'[id="' + this.elId + '-btn-add"]' +
-								'[class="' + this.prefix + '-btn-add rounded-corner-bottom shadow-border clearfix"]' +
+								'[class="' + this.prefix + '-btn-add rounded-corner-bottom shadow-border"]' +
 								'[text="' + this.btnAdd('get') + '"]'
 						).removeEvents('click').addEvent('click', function(e){
 							e.stop();
@@ -115,6 +141,11 @@ var mooCompleter = new Class({
 							//execute the onComplete event
 							this.fireEvent('complete', [this.getItems(), this.element]);
 						}.bind(this)),
+						new Element('div' +
+								'[id="' + this.elId + '-header"]' + 
+								'[class="' + this.prefix + '-header"]' +
+								'[title="Move"]'
+						),
 						new Element('div' + 
 								'[id="' + this.elId + '-label-div"]' +
 								'[class="' + this.prefix + '-label-div rounded-corner-5 shadow-border clearfix"]').adopt(
@@ -139,7 +170,12 @@ var mooCompleter = new Class({
 								)
 						)
 				)
-		).makeDraggable({container: this.element.getParent('body')});
+		);
+		
+		
+		
+		//Init darg and drop action on div element
+		this.initDragEvents();
 		
 		//create select option area if [selectOptions = true]
 		this.constructSelectOption();
@@ -149,6 +185,24 @@ var mooCompleter = new Class({
 		new OverText(this.elId + '-label-input');
 		
 		this.showContentArea();
+		
+		//set window centered
+		this.setCenter();
+	},
+	
+	setCenter: function() {
+		var bodySize = document.body.getSize();
+		this.element.setStyles({
+			top  : (bodySize.y / 2) - (this.options.fxHeight / 2),
+			left : (bodySize.x / 2) - (this.options.fxWidth / 2)
+		});
+	},
+	
+	initDragEvents: function() {		
+		var header = document.id(this.elId + '-header');		
+		new Drag.Move(this.element, {
+			handle: document.id(this.elId + '-header')
+		});
 	},
 	
 	getItems: function() {
@@ -300,16 +354,16 @@ var mooCompleter = new Class({
 		if(this.status) {
 			this.element.setStyles({
 				visibility: 'visible',
-				zIndex: 3
+				zIndex: this.options.zIndexOn
 			});
 			this.overlayElement.setStyles({
 				visibility:'hidden',
-				zIndex: -1
+				zIndex: this.options.zIndexOff
 			});
 		} else {
 			this.element.setStyles({
 				visibility:'hidden',
-				zIndex: -1
+				zIndex: this.options.zIndexOff
 			});
 			this.overlayElement.setStyles({
 				visibility:'visible',
