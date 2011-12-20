@@ -93,11 +93,11 @@ div.mc-content-header {
 }
 
 div.mc-content-area {
-	position: static;
+	position: relative;
 }
 
 div.mc-content_overlay {
-	position: absolute;
+	position: relative;
 	font-size: 1.1em;
 	font-weight: bold;
 	text-align: center;

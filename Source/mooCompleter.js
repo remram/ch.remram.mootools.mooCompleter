@@ -17,6 +17,7 @@ provides: [mooCompleter, auto complete, select option]
 ...
 */
 
+var mooCompleterConter = 1;
 var mooCompleter = new Class({
 	Implements: [Options, Events, mooCompleterAutoList, mooCompleterSelectOptions],
 
@@ -33,7 +34,7 @@ var mooCompleter = new Class({
 		fxHeight              : 300,
 		fxWidth               : 600,
 		maxItemsPerPage       : 10,
-		zIndexOn              : 65000,
+		zIndexOn              : 100,
 		zIndexOff             : -1,
 		prefix                : 'mc-content',
 		errors                : {
@@ -104,7 +105,7 @@ var mooCompleter = new Class({
 		
 		this.element.destroy();
 		this.element = tempElement.clone()
-								  .inject(document.body, 'after')
+								  .inject(document.body)
 								  .setProperty('id', tempElement.getProperty('id').split('_')[0])
 								  .addClass(this.prefix);
 		tempElement.destroy();
@@ -172,10 +173,8 @@ var mooCompleter = new Class({
 				)
 		);
 		
-		
-		
-		//Init darg and drop action on div element
-		this.initDragEvents();
+		//add events on element
+		this.initElementEvents();
 		
 		//create select option area if [selectOptions = true]
 		this.constructSelectOption();
@@ -198,11 +197,16 @@ var mooCompleter = new Class({
 		});
 	},
 	
-	initDragEvents: function() {		
+	initElementEvents: function() {		
 		var header = document.id(this.elId + '-header');		
 		new Drag.Move(this.element, {
 			handle: document.id(this.elId + '-header')
 		});
+		
+		this.element.removeEvents('mousedown').addEvent('mousedown', function(e) {
+			this.element.setStyle('z-index', (this.options.zIndexOn + mooCompleterConter));
+			mooCompleterConter++;
+		}.bind(this));
 	},
 	
 	getItems: function() {
@@ -354,7 +358,7 @@ var mooCompleter = new Class({
 		if(this.status) {
 			this.element.setStyles({
 				visibility: 'visible',
-				zIndex: this.options.zIndexOn
+				zIndex: (this.options.zIndexOn + mooCompleterConter)
 			});
 			this.overlayElement.setStyles({
 				visibility:'hidden',
@@ -370,6 +374,7 @@ var mooCompleter = new Class({
 				zIndex: 1
 			});
 		}
+		mooCompleterConter++;
 	},
 	
 	setSelectedItemBgColor: function(el) {
