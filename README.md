@@ -21,6 +21,9 @@ Options
 		unique                : true,
 		fxHeight              : 300,
 		fxWidth               : 600,
+		maxItemsPerPage       : 10,
+		zIndexOn              : 100,
+		zIndexOff             : -1,
 		prefix                : 'mc-content',
 		errors                : {
 			duplicateElement  : 'Warning: Declaration for element [{element_id}] was wrong!\n It could have been added a few times!',

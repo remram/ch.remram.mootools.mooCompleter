@@ -17,7 +17,7 @@ provides: [mooCompleter, auto complete, select option]
 ...
 */
 
-var mooCompleterConter = 1;
+var mooCompleterCounter = 1;
 var mooCompleter = new Class({
 	Implements: [Options, Events, mooCompleterAutoList, mooCompleterSelectOptions],
 
@@ -51,19 +51,17 @@ var mooCompleter = new Class({
 
 		this.elId                       = this.element.getProperty('id');
 		this.prefix                     = this.options.prefix;
-		this.elementSize                = this.element.getSize();
+		this.buttonSize                 = this.element.getSize();
 		this.selectedItems              = this.options.selectedItems;
 		this.selectedItemsInitialLength = this.selectedItems.length;
 		this.morphFx                    = {};
 		this.status                     = false;
-		this.overlayElement             = {};
 		
 		if(this.options.label.test(/\w+/)) this.options.buttonLabel = this.options.label;
 		this.overlayLabel               = this.options.buttonLabel;
 		
 		
 		this.cleanLabelInput();
-		this.replaceElement();
 		this.constructInputArea();
 	},
 	
@@ -93,41 +91,29 @@ var mooCompleter = new Class({
 		return boolean;
 	},
 	
-	replaceElement: function(){
-		if(!this.checkDataArray()) {
-			this.element.set('text', this.options.errors.dataArray);
-			return null;
-		}
-		
-		var tempElement = this.cloneElement(this.element, 'after', '_clone').adopt(
-				new Element('div[' + this.elId + '-header][class="' + this.prefix + '-area"]')
-		);
-		
-		this.element.destroy();
-		this.element = tempElement.clone()
-								  .inject(document.body)
-								  .setProperty('id', tempElement.getProperty('id').split('_')[0])
-								  .addClass(this.prefix);
-		tempElement.destroy();
-	},
-	
 	constructInputArea: function() {
 		if(!this.checkDataArray()) {
 			this.element.set('text', this.options.errors.dataArray);
 			return null;
 		}
 		
-		//set some styles
-		this.element.setStyle('cursor','pointer').addClass('rounded-corner-bottom');
+		//create working area
+		this.window = new Element('div' +
+				'[id="' + this.elId + '-window"]' + 
+				'[class="' + this.prefix + '-window"]' +
+				'[style="visibility: hidden; width: ' + this.options.fxWidth + 'px"]'
+		).inject(document.body); 
+		
+		var selectedItemAreaHeight = this.options.selectOptions ? (this.options.fxHeight - 110) / 2 : (this.options.fxHeight - 110);
 		
 		//clone the element
-		this.overlayElement = this.cloneElement(this.element, 'after', '_overlay').set('text',this.overlayLabel).addClass('shadow');
+		this.element.set('text',this.overlayLabel).addClass('mc-content-btn rounded-corner-bottom shadow');
 		
 		//switch overlay
 		this.switchOverlay();
 		
-		this.element.adopt(
-				new Element('div[id="' + this.elId + '-area"][class="' + this.prefix + '-area"][style="visibility: hidden; width: ' + this.options.fxWidth + 'px"]').adopt(
+		this.window.adopt(
+				new Element('div[id="' + this.elId + '-area"][class="' + this.prefix + '-area"][style="width: ' + this.options.fxWidth + 'px"]').adopt(
 						new Element('div' + 
 								'[id="' + this.elId + '-btn-add"]' +
 								'[class="' + this.prefix + '-btn-add rounded-corner-bottom shadow-border"]' +
@@ -167,7 +153,8 @@ var mooCompleter = new Class({
 								),
 								new Element('div'+
 										'[id="' + this.elId + '-completer-element-container-div"]' +
-										'[class="' + this.prefix + '-completer-element-container-div"]'
+										'[class="' + this.prefix + '-completer-element-container-div"]' +
+										'[style="max-height: ' + selectedItemAreaHeight + 'px;"]'
 								)
 						)
 				)
@@ -191,7 +178,7 @@ var mooCompleter = new Class({
 	
 	setCenter: function() {
 		var bodySize = document.body.getSize();
-		this.element.setStyles({
+		this.window.setStyles({
 			top  : (bodySize.y / 2) - (this.options.fxHeight / 2),
 			left : (bodySize.x / 2) - (this.options.fxWidth / 2)
 		});
@@ -199,13 +186,13 @@ var mooCompleter = new Class({
 	
 	initElementEvents: function() {		
 		var header = document.id(this.elId + '-header');		
-		new Drag.Move(this.element, {
+		new Drag.Move(this.window, {
 			handle: document.id(this.elId + '-header')
 		});
 		
-		this.element.removeEvents('mousedown').addEvent('mousedown', function(e) {
-			this.element.setStyle('z-index', (this.options.zIndexOn + mooCompleterConter));
-			mooCompleterConter++;
+		this.window.removeEvents('mousedown').addEvent('mousedown', function(e) {
+			this.window.setStyle('z-index', (this.options.zIndexOn + mooCompleterCounter));
+			mooCompleterCounter++;
 		}.bind(this));
 	},
 	
@@ -240,14 +227,14 @@ var mooCompleter = new Class({
 	},
 
 	showContentArea: function() {
-		this.overlayElement.removeEvents('click').addEvent('click', function(e){
+		this.element.removeEvents('click').addEvent('click', function(e){
 			e.stop();			
 			if(!Object.getFromPath(this.morphFx, 'element')) {
-				this.morphFx = new Fx.Morph(this.element, {
+				this.morphFx = new Fx.Morph(this.window, {
 					onComplete: function() {
 						document.id(this.elId + '-area').setStyle('visibility', 'visible');
 				    	this.addInputEvents();
-				    	this.overlayElement.removeEvents('click');
+				    	this.element.removeEvents('click');
 				    	this.constructCompleterArea();
 				    	this.constructSelectOptionArea();
 					}.bind(this)
@@ -255,13 +242,13 @@ var mooCompleter = new Class({
 			}
 			
 			this.morphFx.start({
-				'height': [this.elementSize.y, this.options.fxHeight],
-				'width' : [this.elementSize.x, this.options.fxWidth ]
+				'height': [this.buttonSize.y, this.options.fxHeight],
+				'width' : [this.buttonSize.x, this.options.fxWidth ]
 			}).chain(function(){
 				this.status = true;
 				this.switchOverlay();
 				document.id(this.elId + '-area').fade('in');
-				this.element.setStyle('cursor','default').addClass('shadow');				
+				this.window.setStyle('cursor','default').addClass('shadow');				
 				this.setLabel();
 				//fire open event
 				this.fireEvent('open', this.element);
@@ -272,12 +259,12 @@ var mooCompleter = new Class({
 	closeContentArea: function() {		
 		document.id(this.elId + '-area').fade('out');
 		this.morphFx.start({
-			'height': [this.options.fxHeight, (this.elementSize.y - 15)],
-			'width' : [this.options.fxWidth , (this.elementSize.x - 15)]
+			'height': [this.options.fxHeight, (this.buttonSize.y - 15)],
+			'width' : [this.options.fxWidth , (this.buttonSize.x - 15)]
 		}).chain(function(){
 			this.status = false;
 			this.switchOverlay();
-			this.element.setStyle('cursor','pointer').removeClass('shadow');
+			this.window.setStyle('cursor','pointer').removeClass('shadow');
 			this.setLabel();
 			this.showContentArea();
 			//fire close event
@@ -329,9 +316,9 @@ var mooCompleter = new Class({
 	
 	setLabel: function() {
 		if(this.overlayLabel !== '') {
-			this.overlayElement.set('text', this.overlayLabel);
+			this.element.set('text', this.overlayLabel);
 		} else {
-			this.overlayElement.empty();
+			this.element.empty();
 		}
 	},
 	
@@ -356,25 +343,25 @@ var mooCompleter = new Class({
 	
 	switchOverlay: function() {
 		if(this.status) {
-			this.element.setStyles({
+			this.window.setStyles({
 				visibility: 'visible',
-				zIndex: (this.options.zIndexOn + mooCompleterConter)
+				zIndex: (this.options.zIndexOn + mooCompleterCounter)
 			});
-			this.overlayElement.setStyles({
+			this.element.setStyles({
 				visibility:'hidden',
 				zIndex: this.options.zIndexOff
 			});
 		} else {
-			this.element.setStyles({
+			this.window.setStyles({
 				visibility:'hidden',
 				zIndex: this.options.zIndexOff
 			});
-			this.overlayElement.setStyles({
+			this.element.setStyles({
 				visibility:'visible',
 				zIndex: 1
 			});
 		}
-		mooCompleterConter++;
+		mooCompleterCounter++;
 	},
 	
 	setSelectedItemBgColor: function(el) {

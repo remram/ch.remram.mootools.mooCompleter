@@ -71,15 +71,20 @@ div.mc-content {
 	position: absolute;
 	width: 200px;
 	height: 20px;
-	border: 1px solid #aaa;
-	background-color: #FAFAFA;
 	margin-bottom: 1em;
 	padding: .5em;
 	text-shadow: 1px 1px 0px #fff;
-	display: block;
+	display: block;	
+}
+
+div.mc-content-window {	
+	border: 1px solid #aaa;
+	background-color: #FAFAFA;
 	font-family: sans-serif;
 	font-size: .8em;
 	color: #555;
+	padding: .5em;
+	text-shadow: 1px 1px 0px #fff;		
 }
 
 div.mc-content-header {
@@ -96,7 +101,7 @@ div.mc-content-area {
 	position: relative;
 }
 
-div.mc-content_overlay {
+div.mc-content-btn {
 	position: relative;
 	font-size: 1.1em;
 	font-weight: bold;
@@ -104,15 +109,16 @@ div.mc-content_overlay {
 	background-color: #FAFAFA;
 	font-family: sans-serif;
 	font-size: .8em;
-	color: #555;	
+	color: #555;
+	cursor: pointer;
 }
 
-div.mc-content_overlay:hover {
+div.mc-content-btn:hover {
 	color: #0B55C4;
 	background-color: #E6E6E6;
 }
 
-div.mc-content ul {
+div.mc-content-window ul {
 	list-style: none;
 	margin: 0 auto;
 	padding: 0;		
