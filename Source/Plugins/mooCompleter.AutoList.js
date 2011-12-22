@@ -193,30 +193,31 @@ var mooCompleterAutoList = new Class({
 		}
 	},
 	
-	destroyDuplicateEntries: function() {
-		var tempArray = [];
-		Array.each(this.options.data, function(obj, index){
-			if(!this.selectedItems.contains(obj.key)) {
-				tempArray.include(obj);
-			}
-		}.bind(this));
-		
-		this.clonedData = Array.clone(tempArray);
-	},
-	
 	createFilteredArray: function() {
-		if(this.options.unique) {
-			this.destroyDuplicateEntries();
-		} else {
-			this.clonedData = Array.clone(this.options.data);
+		this.clonedData = [];
+		var maxItemPerPage = this.options.maxItemsPerPage;
+		//iterate the hole data array
+		for (i=0 ; i < this.options.data.length ; i++) {
+			//until reaching the max length of list
+			if(i < maxItemPerPage) {
+				/**
+				 * if search string contains in the array AND 
+				 * doesn't contains in the selectedItem array THAN
+				 * include new row in clonedData array 
+				 */
+				if(this.options.data[i].value.test(this.filterValue, 'i') && !this.selectedItems.contains(this.options.data[i].key) ) {
+					this.clonedData.include(this.options.data[i]);
+				} else {
+					//else resize maxItemPerPage 
+					maxItemPerPage++;
+				}
+			} else {
+				//else maxItemPerPage is reached than break the loop
+				i = this.options.data.length;
+			}
 		}
 		
-		this.filteredArray = this.highlightFilteredArray( 
-									this.clonedData.filter(
-											function(element, index){
-												return element.value.test(this.filterValue, 'i');
-											}.bind(this)) 
-							);
+		this.filteredArray = this.highlightFilteredArray(this.clonedData);
 		
 		this.cleanCompleterList();
 		if(this.filteredArray.length >= 1) {
@@ -226,16 +227,22 @@ var mooCompleterAutoList = new Class({
 	
 	highlightFilteredArray: function(filteredArray) {
 		var highlightedArray = [];
-		Array.each(filteredArray, function(obj, index) {
-			highlightedArray.include([
-			                          obj.key, obj.value, this.highlightString(obj.value)
-			                          ]);
-		}.bind(this));
+		var i = 0;
+		while(i < this.options.maxItemsPerPage) {
+			if(i < filteredArray.length) {
+				highlightedArray.include([
+				                          filteredArray[i].key, filteredArray[i].value, this.highlightString(filteredArray[i].value)
+				                          ]);
+				i++;
+			} else {
+				i = this.options.maxItemsPerPage;
+			}
+		}
 		return highlightedArray;
 	},
 	
 	highlightString: function(str) {
-		var reg = new RegExp('(' + this.filterValue + ')', 'g');
+		var reg = new RegExp('(' + this.filterValue + ')', 'gi');
 		return str.replace(reg,'<b>' + this.filterValue + '</b>');
 	},
 	
@@ -250,7 +257,7 @@ var mooCompleterAutoList = new Class({
 				'[class="' + this.prefix + '-auto-completer-list-area rounded-corner-bottom"]'
 		).setStyles({
 			width      : this.inputElement.getCoordinates().width - 10,
-			visibility : 'hidden'
+			display : 'none'
 		}).inject(this.inputElement, 'after');
 	},
 	
@@ -260,7 +267,7 @@ var mooCompleterAutoList = new Class({
 				this.ulCompleter
 		);
 		
-		if(typeOf(this.divAutoList).test('element') && !this.isElementEmpty(this.divAutoList, 'html')) this.divAutoList.setStyle('visibility', 'visible').fade(.9);
+		if(typeOf(this.divAutoList).test('element') && !this.isElementEmpty(this.divAutoList, 'html')) this.divAutoList.setStyle('display', '').fade(.9);
 		var maxIterate    = this.options.maxItemsPerPage;
 		var filterdLength = this.filteredArray.length;
 		if(maxIterate > filterdLength) maxIterate = filterdLength;

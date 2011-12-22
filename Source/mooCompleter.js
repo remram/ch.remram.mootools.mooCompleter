@@ -100,7 +100,7 @@ var mooCompleter = new Class({
 		//create working area
 		this.window = new Element('div' +
 				'[id="' + this.elId + '-window"]' + 
-				'[class="' + this.prefix + '-window"]' +
+				'[class="' + this.prefix + '-window rounded-corner-bottom"]' +
 				'[style="visibility: hidden; width: ' + this.options.fxWidth + 'px"]'
 		).inject(document.body); 
 		
