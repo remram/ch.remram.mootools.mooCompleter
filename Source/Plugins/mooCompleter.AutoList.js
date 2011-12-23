@@ -70,7 +70,6 @@ var mooCompleterAutoList = new Class({
 	
 	addCompleterEvent: function() {	
 		if(typeOf(this.inputElement).test('element') && !this.isElementEmpty(this.inputElement, 'html')) return;
-		//this.createAutoListArea();
 		var ulList = {};
 		
 		this.inputElement.removeEvents().addEvents({
@@ -197,15 +196,18 @@ var mooCompleterAutoList = new Class({
 		this.clonedData = [];
 		var maxItemPerPage = this.options.maxItemsPerPage;
 		//iterate the hole data array
-		for (i=0 ; i < this.options.data.length ; i++) {
+		for (i=0 ; i < this.options.data.length ; i++) {			
 			//until reaching the max length of list
 			if(i < maxItemPerPage) {
-				/**
-				 * if search string contains in the array AND 
-				 * doesn't contains in the selectedItem array THAN
-				 * include new row in clonedData array 
-				 */
-				if(this.options.data[i].value.test(this.filterValue, 'i') && !this.selectedItems.contains(this.options.data[i].key) ) {
+				//unique array, selected item will be destroyed from auto completer list
+				if(this.options.unique) {
+					if(this.options.data[i].value.test(this.filterValue, 'i') && !this.selectedItems.contains(this.options.data[i].key)) {
+						this.clonedData.include(this.options.data[i]);
+					} else {
+						//else resize maxItemPerPage 
+						maxItemPerPage++;
+					}
+				} else if(this.options.data[i].value.test(this.filterValue, 'i')) {
 					this.clonedData.include(this.options.data[i]);
 				} else {
 					//else resize maxItemPerPage 
