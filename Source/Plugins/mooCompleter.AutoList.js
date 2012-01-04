@@ -30,7 +30,7 @@ provides: [mooCompleterAutoList]
 })();
 
 var mooCompleterAutoList = new Class({
-
+	
 	initialize: function(){
 		this.inputElement   = {};
 		this.inputOverText  = {};
@@ -302,9 +302,9 @@ var mooCompleterAutoList = new Class({
 					//empty or reset the auto completer input field
 					this.inputElement.set('value','');
 					this.btnAdd();
-					this.destroyAutoList();
 					//add blur event on input field
 					this.switchBlurEventOnAutoCompleterField(true);
+					this.divAutoList.destroy();
 			}.bind(this));
 		}.bind(this));
 	},

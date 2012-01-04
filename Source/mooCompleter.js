@@ -11,11 +11,33 @@ requires:
 - core/1.4: '*'
 - more/1.4: 'Object'
 - more/1.4: 'Drag.Move'
+- more/1.4: 'OverText'
 
 provides: [mooCompleter, auto complete, select option]
 
 ...
 */
+
+(function(){
+	Array.implement({
+		equals: function(arr) {
+			//check input if they are arrays
+			if(!this || !typeOf(this).test('array')) return;
+			if(!arr || !typeOf(arr).test('array')) return;
+			
+			//check length of both arrays
+			if(this.length !== arr.length) return false;
+			
+			//check content if they are equals
+			var boolean = true;			
+			this.each(function(item, index){
+				if(!arr.contains(item)) boolean = false;
+			});
+			
+			return boolean;
+		}
+	});
+})();
 
 var mooCompleterCounter = 1;
 var mooCompleter = new Class({
@@ -52,7 +74,7 @@ var mooCompleter = new Class({
 		this.elId                       = this.element.getProperty('id');
 		this.prefix                     = this.options.prefix;
 		this.buttonSize                 = this.element.getSize();
-		this.selectedItems              = this.options.selectedItems;
+		this.selectedItems              = Array.clone(this.options.selectedItems);
 		this.selectedItemsInitialLength = this.selectedItems.length;
 		this.morphFx                    = {};
 		this.status                     = false;
@@ -63,6 +85,10 @@ var mooCompleter = new Class({
 		
 		this.cleanLabelInput();
 		this.constructInputArea();
+	},
+	
+	toElement: function() {
+		return this.element;
 	},
 	
 	checkMainElement: function(element) {
@@ -125,8 +151,19 @@ var mooCompleter = new Class({
 							this.destroyAutoList();
 							//close area and view it as a button
 							this.closeContentArea();
+							
+							if(this.options.selectedItems.equals(this.selectedItems) || this.options.selectedItems.length !== 0) {
+								//execute onUpdate event
+								this.fireEvent('update', [this.getItems(), this.element]);
+							} else {
+								this.options.selectedItems = Array.clone(this.selectedItems);
+								//execute onAdd event
+								this.fireEvent('add', [this.getItems(), this.element]);
+								//this.fireEvent('add', [this.getItems(), this.element]);
+							}
 							//execute the onComplete event
 							this.fireEvent('complete', [this.getItems(), this.element]);
+								
 						}.bind(this)),
 						new Element('div' +
 								'[id="' + this.elId + '-header"]' + 
@@ -251,7 +288,7 @@ var mooCompleter = new Class({
 				this.window.setStyle('cursor','default').addClass('shadow');				
 				this.setLabel();
 				//fire open event
-				this.fireEvent('open', this.element);
+				this.fireEvent('open', [this.getItems(), this.element]);
 			}.bind(this));
 		}.bind(this));
 	},
@@ -268,7 +305,7 @@ var mooCompleter = new Class({
 			this.setLabel();
 			this.showContentArea();
 			//fire close event
-			this.fireEvent('close', this.element);
+			this.fireEvent('close', [this.getItems(), this.element]);
 		}.bind(this));
 	},
 	

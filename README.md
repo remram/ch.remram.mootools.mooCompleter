@@ -35,10 +35,12 @@ Events
 ------
 
 - onOpen
-- onClose
 - onSelect
 - onDeSelect
+- onAdd
+- onUpdate
 - onComplete
+- onClose
 
 Demo
 ----
