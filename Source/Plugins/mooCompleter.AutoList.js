@@ -244,6 +244,7 @@ var mooCompleterAutoList = new Class({
 	},
 	
 	highlightString: function(str) {
+		if(!this.filterValue) return str;
 		var reg = new RegExp('(' + this.filterValue + ')', 'gi');
 		return str.replace(reg,'<b>' + this.filterValue + '</b>');
 	},

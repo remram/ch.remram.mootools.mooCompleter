@@ -69,7 +69,7 @@ var mooCompleterSelectOptions = new Class({
 							'[refkey="' + obj.key + '"]' +
 							'[refvalue="' + obj.value + '"]' +
 							'[class="' + this.prefix + '-options-li rounded-corner-top-5 shadow-border"]').adopt(
-									new Element('span[text="' + obj.value + '"]')
+									new Element('span[html="' + obj.value + '"]')
 					)
 			);
 		}

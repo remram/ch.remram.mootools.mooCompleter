@@ -18,6 +18,9 @@ provides: [mooCompleter, auto complete, select option]
 ...
 */
 
+/**
+ * implement the equals method
+ */
 (function(){
 	Array.implement({
 		equals: function(arr) {
@@ -133,7 +136,7 @@ var mooCompleter = new Class({
 		var selectedItemAreaHeight = this.options.selectOptions ? (this.options.fxHeight - 110) / 2 : (this.options.fxHeight - 110);
 		
 		//clone the element
-		this.element.set('text',this.overlayLabel).addClass('mc-content-btn rounded-corner-bottom shadow');
+		this.element.set('html',this.overlayLabel).addClass('mc-content-btn rounded-corner-bottom shadow');
 		
 		//switch overlay
 		this.switchOverlay();
@@ -353,7 +356,7 @@ var mooCompleter = new Class({
 	
 	setLabel: function() {
 		if(this.overlayLabel !== '') {
-			this.element.set('text', this.overlayLabel);
+			this.element.set('html', this.overlayLabel);
 		} else {
 			this.element.empty();
 		}
@@ -453,7 +456,7 @@ var mooCompleter = new Class({
 								new Element('div' +
 										'[class="' + this.prefix + '-selected-element-value"]' + 
 										'[key="' + obj.key + '"]' +
-										'[text="' + obj.value + '"]'
+										'[html="' + obj.value + '"]'
 								)
 						)
 				)
